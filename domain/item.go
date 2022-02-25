@@ -1,0 +1,17 @@
+package domain
+
+type Item struct {
+	Id 						string
+	Name                 	string
+	UnitSizePresentation 	string
+	SizePresentation     	int
+	Code                 	string
+	Container 				string
+	Photo 					string
+}
+
+func NewItem(id string, name string, unitSizePresentation string, sizePresentation int,
+	code string, container string, photo string) *Item {
+	return &Item{Id: id, Name: name, UnitSizePresentation: unitSizePresentation,
+		SizePresentation: sizePresentation, Code: code, Container: container, Photo: photo}
+}
