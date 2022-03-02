@@ -7,9 +7,9 @@ import (
 )
 
 type IInventoryRepository interface {
-	All() ([]*domain.Inventory, error)
-	Find(id string) (*domain.Inventory, error)
-	Update(id string, operationDate time.Time) errors.BaseError
-	Create(operationDate time.Time) (*domain.Inventory, error)
-	Delete(id string) error
+	All() ([]*domain.Inventory, errors.IBaseError)
+	Find(id string) (*domain.Inventory, errors.IBaseError)
+	Update(id string, operationDate time.Time) errors.IBaseError
+	Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError)
+	Delete(id string) errors.IBaseError
 }

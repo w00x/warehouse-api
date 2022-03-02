@@ -15,12 +15,12 @@ func NewInventoryRepository() *InventoryRepository {
 	return &InventoryRepository{postgresBase}
 }
 
-func (i InventoryRepository) All() ([]*domain.Inventory, error) {
+func (i InventoryRepository) All() ([]*domain.Inventory, errors.IBaseError) {
 	q := "SELECT id, operation_date FROM main_schema.inventories;"
 
 	rows, err := i.postgresBase.DB.Query(q)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewInternalServerError(err.Error())
 	}
 	defer rows.Close()
 	var inventories []*domain.Inventory
@@ -34,24 +34,24 @@ func (i InventoryRepository) All() ([]*domain.Inventory, error) {
 	return inventories, nil
 }
 
-func (i InventoryRepository) Find(id string) (*domain.Inventory, error) {
+func (i InventoryRepository) Find(id string) (*domain.Inventory, errors.IBaseError) {
 	q := "SELECT id, operation_date FROM main_schema.inventories WHERE id = $1;"
 
 	rows, err := i.postgresBase.DB.Query(q, id)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewInternalServerError(err.Error())
 	}
 	defer rows.Close()
 	var inventory domain.Inventory
 	if rows.Next() {
 		rows.Scan(&inventory.Id, &inventory.OperationDate)
 	} else {
-		return nil, nil
+		return nil, errors.NewNotFoundError("Repository not found (ID="+ id +")")
 	}
 	return &inventory, nil
 }
 
-func (i InventoryRepository) Update(id string, operationDate time.Time) errors.BaseError {
+func (i InventoryRepository) Update(id string, operationDate time.Time) errors.IBaseError {
 	q := `UPDATE main_schema.inventories
 	SET operation_date = $2
 	WHERE id = $1;`
@@ -66,16 +66,45 @@ func (i InventoryRepository) Update(id string, operationDate time.Time) errors.B
 	}
 
 	if count == 0 {
-		return errors.NewNotFoundError("Inventory not found")
+		return errors.NewNotFoundError("Repository not found (ID="+ id +")")
 	}
 
 	return nil
 }
 
-func (i InventoryRepository) Create(operationDate time.Time) (*domain.Inventory, error) {
-	return domain.NewInventory("2", time.Time(operationDate)), nil
+func (i InventoryRepository) Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
+	q := `INSERT INTO main_schema.inventories (operation_date)
+		  VALUES ($1) RETURNING id;`
+
+	rows, err := i.postgresBase.DB.Query(q, operationDate)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	var inventory domain.Inventory
+	if rows.Next() {
+		rows.Scan(&inventory.Id)
+		inventory.OperationDate = operationDate
+	} else {
+		return nil, errors.NewNotCreatedError("Repository not created")
+	}
+	return &inventory, nil
 }
 
-func (i InventoryRepository) Delete(id string) error {
-	panic("implement me")
+func (i InventoryRepository) Delete(id string) errors.IBaseError {
+	q := `DELETE FROM main_schema.inventories WHERE id = $1;`
+
+	rows, err := i.postgresBase.DB.Exec(q, id)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	count, err := rows.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if count == 0 {
+		return errors.NewNotFoundError("Repository not found (ID="+ id +")")
+	}
+
+	return nil
 }

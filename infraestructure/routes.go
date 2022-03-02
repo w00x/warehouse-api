@@ -17,6 +17,7 @@ func Routes() {
 			inventory.GET("/:id", inventoryController.Get)
 			inventory.POST("", inventoryController.Create)
 			inventory.PATCH("/:id", inventoryController.Update)
+			inventory.DELETE("/:id", inventoryController.Delete)
 		}
 	}
 	route.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")

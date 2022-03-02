@@ -19,9 +19,9 @@ func NewInventoryController(inventoryRepository repository.IInventoryRepository)
 }
 
 func (inventoryController *InventoryController) Index(c *gin.Context) {
-	inventories, error := inventoryController.inventoryApplication.All()
-	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+	inventories, err := inventoryController.inventoryApplication.All()
+	if err != nil {
+		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, serializer.NewInventoryListSerializerFromDomains(inventories))
@@ -29,9 +29,9 @@ func (inventoryController *InventoryController) Index(c *gin.Context) {
 
 func (inventoryController *InventoryController) Get(c *gin.Context) {
 	id := c.Param("id")
-	inventory, error := inventoryController.inventoryApplication.Show(id)
-	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": error.Error()})
+	inventory, err := inventoryController.inventoryApplication.Show(id)
+	if err != nil {
+		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -49,9 +49,9 @@ func (inventoryController *InventoryController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	inventory, error := inventoryController.inventoryApplication.Create(time.Time(inventorySerializer.OperationDate))
-	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{ "error": error.Error() })
+	inventory, err := inventoryController.inventoryApplication.Create(time.Time(inventorySerializer.OperationDate))
+	if err != nil {
+		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
 	c.JSON(http.StatusOK, serializer.NewInventorySerializerFromDomain(inventory))
@@ -71,4 +71,15 @@ func (inventoryController *InventoryController) Update(c *gin.Context) {
 	}
 	inventorySerializer.Id = id
 	c.JSON(http.StatusOK, inventorySerializer)
+}
+
+func (inventoryController *InventoryController) Delete(c *gin.Context) {
+	id := c.Param("id")
+	err := inventoryController.inventoryApplication.Delete(id)
+	if err != nil {
+		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, "")
 }
