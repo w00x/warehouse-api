@@ -69,8 +69,7 @@ func (inventoryController *InventoryController) Update(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	inventorySerializer.Id = id
-	c.JSON(http.StatusOK, inventorySerializer)
+	c.JSON(http.StatusNoContent, nil)
 }
 
 func (inventoryController *InventoryController) Delete(c *gin.Context) {
@@ -81,5 +80,5 @@ func (inventoryController *InventoryController) Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, "")
+	c.JSON(http.StatusNoContent, nil)
 }

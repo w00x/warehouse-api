@@ -7,11 +7,11 @@ import (
 )
 
 type InventorySerializer struct {
-	Id 				string `json:"id"`
+	Id 				uint `json:"id"`
 	OperationDate 	shared.DateTime `json:"operation_date" binding:"required"`
 }
 
-func NewInventorySerializer(id string, operationDate shared.DateTime) *InventorySerializer {
+func NewInventorySerializer(id uint, operationDate shared.DateTime) *InventorySerializer {
 	return &InventorySerializer{Id: id, OperationDate: operationDate}
 }
 

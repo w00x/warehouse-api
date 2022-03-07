@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"gorm.io/gorm"
 	"time"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
@@ -16,9 +17,7 @@ func NewInventoryRepository() *InventoryRepository {
 }
 
 func (i InventoryRepository) All() ([]*domain.Inventory, errors.IBaseError) {
-	q := "SELECT id, operation_date FROM main_schema.inventories;"
-
-	rows, err := i.postgresBase.DB.Query(q)
+	rows, err := i.postgresBase.DB.Model(&domain.Inventory{}).Rows()
 	if err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -27,7 +26,10 @@ func (i InventoryRepository) All() ([]*domain.Inventory, errors.IBaseError) {
 
 	for rows.Next() {
 		var inventory domain.Inventory
-		rows.Scan(&inventory.Id, &inventory.OperationDate)
+		err := rows.Scan(&inventory.Id, &inventory.OperationDate, &inventory.CreatedAt, &inventory.UpdatedAt)
+		if err != nil {
+			return nil, errors.NewInternalServerError(err.Error())
+		}
 		inventories = append(inventories, &inventory)
 	}
 
@@ -35,75 +37,77 @@ func (i InventoryRepository) All() ([]*domain.Inventory, errors.IBaseError) {
 }
 
 func (i InventoryRepository) Find(id string) (*domain.Inventory, errors.IBaseError) {
-	q := "SELECT id, operation_date FROM main_schema.inventories WHERE id = $1;"
+	var inventory domain.Inventory
+	result := i.postgresBase.DB.First(&inventory, id)
 
-	rows, err := i.postgresBase.DB.Query(q, id)
-	if err != nil {
+	if err := result.Error; err == gorm.ErrRecordNotFound {
+		return nil, errors.NewNotFoundError("Repository not found")
+	} else if err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
-	defer rows.Close()
-	var inventory domain.Inventory
-	if rows.Next() {
-		rows.Scan(&inventory.Id, &inventory.OperationDate)
-	} else {
-		return nil, errors.NewNotFoundError("Repository not found (ID="+ id +")")
-	}
+
 	return &inventory, nil
 }
 
-func (i InventoryRepository) Update(id string, operationDate time.Time) errors.IBaseError {
-	q := `UPDATE main_schema.inventories
-	SET operation_date = $2
-	WHERE id = $1;`
-
-	rows, err := i.postgresBase.DB.Exec(q, id, operationDate)
-	if err != nil {
-		return errors.NewInternalServerError(err.Error())
+func (i InventoryRepository) Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
+	inventory := domain.NewInventory(0, operationDate)
+	result:= i.postgresBase.DB.Create(inventory)
+	if err := result.Error; err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
 	}
-	count, err := rows.RowsAffected()
-	if err != nil {
-		panic(err)
-	}
+	count := result.RowsAffected
 
 	if count == 0 {
-		return errors.NewNotFoundError("Repository not found (ID="+ id +")")
+		return nil, errors.NewNotFoundError("Repository not created")
+	}
+
+	return inventory, nil
+}
+
+func (i InventoryRepository) Update(id string, operationDate time.Time) errors.IBaseError {
+	var inventory domain.Inventory
+	result := i.postgresBase.DB.First(&inventory, id)
+
+	if err := result.Error; err == gorm.ErrRecordNotFound {
+		return errors.NewNotFoundError("Repository not found")
+	} else if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	inventory.OperationDate = operationDate
+	result = i.postgresBase.DB.Save(inventory)
+
+	if err := result.Error; err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	count := result.RowsAffected
+
+	if count == 0 {
+		return errors.NewNotFoundError("Repository not updated")
 	}
 
 	return nil
 }
 
-func (i InventoryRepository) Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
-	q := `INSERT INTO main_schema.inventories (operation_date)
-		  VALUES ($1) RETURNING id;`
-
-	rows, err := i.postgresBase.DB.Query(q, operationDate)
-	if err != nil {
-		return nil, errors.NewInternalServerError(err.Error())
-	}
-	var inventory domain.Inventory
-	if rows.Next() {
-		rows.Scan(&inventory.Id)
-		inventory.OperationDate = operationDate
-	} else {
-		return nil, errors.NewNotCreatedError("Repository not created")
-	}
-	return &inventory, nil
-}
-
 func (i InventoryRepository) Delete(id string) errors.IBaseError {
-	q := `DELETE FROM main_schema.inventories WHERE id = $1;`
+	var inventory domain.Inventory
+	result := i.postgresBase.DB.First(&inventory, id)
 
-	rows, err := i.postgresBase.DB.Exec(q, id)
-	if err != nil {
+	if err := result.Error; err == gorm.ErrRecordNotFound {
+		return errors.NewNotFoundError("Repository not found")
+	} else if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
-	count, err := rows.RowsAffected()
-	if err != nil {
-		panic(err)
+
+	result = i.postgresBase.DB.Delete(inventory)
+
+	if err := result.Error; err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
+	count := result.RowsAffected
 
 	if count == 0 {
-		return errors.NewNotFoundError("Repository not found (ID="+ id +")")
+		return errors.NewNotFoundError("Repository not deleted")
 	}
 
 	return nil

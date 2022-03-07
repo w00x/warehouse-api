@@ -1,14 +1,15 @@
 package postgres
 
 import (
-	"database/sql"
 	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"warehouse/shared"
 )
 
 type PostgresBase struct {
-	DB *sql.DB
+	DB *gorm.DB
 }
 
 func NewPostgresBase() *PostgresBase {
@@ -20,7 +21,7 @@ func NewPostgresBase() *PostgresBase {
 	return &PostgresBase{connectionDb}
 }
 
-func getConnection() (*sql.DB, error) {
+func getConnection() (*gorm.DB, error) {
 	uri := shared.GetEnv("DATABASE_URI")
-	return sql.Open("postgres", uri)
+	return gorm.Open(postgres.Open(uri), &gorm.Config{})
 }
