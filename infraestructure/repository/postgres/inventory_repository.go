@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"gorm.io/gorm"
-	"time"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
 )
@@ -16,29 +15,18 @@ func NewInventoryRepository() *InventoryRepository {
 	return &InventoryRepository{postgresBase}
 }
 
-func (i InventoryRepository) All() ([]*domain.Inventory, errors.IBaseError) {
-	rows, err := i.postgresBase.DB.Model(&domain.Inventory{}).Rows()
-	if err != nil {
+func (i InventoryRepository) All() (*[]domain.Inventory, errors.IBaseError) {
+	var instances []domain.Inventory
+	result := i.postgresBase.DB.Model(&domain.Inventory{}).Scan(&instances)
+	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
-	defer rows.Close()
-	var inventories []*domain.Inventory
-
-	for rows.Next() {
-		var inventory domain.Inventory
-		err := rows.Scan(&inventory.Id, &inventory.OperationDate, &inventory.CreatedAt, &inventory.UpdatedAt)
-		if err != nil {
-			return nil, errors.NewInternalServerError(err.Error())
-		}
-		inventories = append(inventories, &inventory)
-	}
-
-	return inventories, nil
+	return &instances, nil
 }
 
-func (i InventoryRepository) Find(id string) (*domain.Inventory, errors.IBaseError) {
-	var inventory domain.Inventory
-	result := i.postgresBase.DB.First(&inventory, id)
+func (i InventoryRepository) Find(id uint) (*domain.Inventory, errors.IBaseError) {
+	var instance domain.Inventory
+	result := i.postgresBase.DB.First(&instance, id)
 
 	if err := result.Error; err == gorm.ErrRecordNotFound {
 		return nil, errors.NewNotFoundError("Repository not found")
@@ -46,12 +34,11 @@ func (i InventoryRepository) Find(id string) (*domain.Inventory, errors.IBaseErr
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 
-	return &inventory, nil
+	return &instance, nil
 }
 
-func (i InventoryRepository) Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
-	inventory := domain.NewInventory(0, operationDate)
-	result:= i.postgresBase.DB.Create(inventory)
+func (i InventoryRepository) Create(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
+	result:= i.postgresBase.DB.Create(instance)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -61,45 +48,26 @@ func (i InventoryRepository) Create(operationDate time.Time) (*domain.Inventory,
 		return nil, errors.NewNotFoundError("Repository not created")
 	}
 
-	return inventory, nil
+	return instance, nil
 }
 
-func (i InventoryRepository) Update(id string, operationDate time.Time) errors.IBaseError {
-	var inventory domain.Inventory
-	result := i.postgresBase.DB.First(&inventory, id)
-
-	if err := result.Error; err == gorm.ErrRecordNotFound {
-		return errors.NewNotFoundError("Repository not found")
-	} else if err != nil {
-		return errors.NewInternalServerError(err.Error())
-	}
-
-	inventory.OperationDate = operationDate
-	result = i.postgresBase.DB.Save(inventory)
+func (i InventoryRepository) Update(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
+	result := i.postgresBase.DB.Save(instance)
 
 	if err := result.Error; err != nil {
-		return errors.NewInternalServerError(err.Error())
+		return nil, errors.NewInternalServerError(err.Error())
 	}
 	count := result.RowsAffected
 
 	if count == 0 {
-		return errors.NewNotFoundError("Repository not updated")
+		return nil, errors.NewNotFoundError("Repository not updated")
 	}
 
-	return nil
+	return instance, nil
 }
 
-func (i InventoryRepository) Delete(id string) errors.IBaseError {
-	var inventory domain.Inventory
-	result := i.postgresBase.DB.First(&inventory, id)
-
-	if err := result.Error; err == gorm.ErrRecordNotFound {
-		return errors.NewNotFoundError("Repository not found")
-	} else if err != nil {
-		return errors.NewInternalServerError(err.Error())
-	}
-
-	result = i.postgresBase.DB.Delete(inventory)
+func (i InventoryRepository) Delete(instance *domain.Inventory) errors.IBaseError {
+	result := i.postgresBase.DB.Delete(instance)
 
 	if err := result.Error; err != nil {
 		return errors.NewInternalServerError(err.Error())

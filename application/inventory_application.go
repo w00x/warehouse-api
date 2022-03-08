@@ -15,22 +15,32 @@ func NewInventoryApplication(inventoryRepository repository.IInventoryRepository
 	return &InventoryApplication{ inventoryRepository }
 }
 
-func (inventoryApplication *InventoryApplication) All() ([]*domain.Inventory, errors.IBaseError) {
+func (inventoryApplication *InventoryApplication) All() (*[]domain.Inventory, errors.IBaseError) {
 	return inventoryApplication.inventoryRepository.All()
 }
 
-func (inventoryApplication *InventoryApplication) Show(id string) (*domain.Inventory, errors.IBaseError) {
+func (inventoryApplication *InventoryApplication) Show(id uint) (*domain.Inventory, errors.IBaseError) {
 	return inventoryApplication.inventoryRepository.Find(id)
 }
 
-func (inventoryApplication *InventoryApplication) Update(id string, operationDate time.Time) errors.IBaseError {
-	return inventoryApplication.inventoryRepository.Update(id, operationDate)
+func (inventoryApplication *InventoryApplication) Update(id uint, operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
+	inventory, err := inventoryApplication.inventoryRepository.Find(id)
+	if err != nil {
+		return nil, err
+	}
+	inventory.OperationDate = operationDate
+	return inventoryApplication.inventoryRepository.Update(inventory)
 }
 
 func (inventoryApplication *InventoryApplication) Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
-	return inventoryApplication.inventoryRepository.Create(operationDate)
+	inventory := domain.NewInventory(0, operationDate)
+	return inventoryApplication.inventoryRepository.Create(inventory)
 }
 
-func (inventoryApplication *InventoryApplication) Delete(id string) errors.IBaseError {
-	return inventoryApplication.inventoryRepository.Delete(id)
+func (inventoryApplication *InventoryApplication) Delete(id uint) errors.IBaseError {
+	inventory, err := inventoryApplication.inventoryRepository.Find(id)
+	if err != nil {
+		return err
+	}
+	return inventoryApplication.inventoryRepository.Delete(inventory)
 }

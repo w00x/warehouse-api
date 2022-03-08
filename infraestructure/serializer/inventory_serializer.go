@@ -7,7 +7,7 @@ import (
 )
 
 type InventorySerializer struct {
-	Id 				uint `json:"id"`
+	Id 				uint `json:"id" uri:"id"`
 	OperationDate 	shared.DateTime `json:"operation_date" binding:"required"`
 }
 
@@ -19,11 +19,11 @@ func NewInventorySerializerFromDomain(inventory *domain.Inventory) *InventorySer
 	return NewInventorySerializer(inventory.Id, shared.DateTime(inventory.OperationDate))
 }
 
-func NewInventoryListSerializerFromDomains(inventories []*domain.Inventory) []*InventorySerializer {
+func NewInventoryListSerializerFromDomains(inventories *[]domain.Inventory) []*InventorySerializer {
 	var inventorySerializers []*InventorySerializer
-	for _, inventory := range inventories {
+	for _, inventory := range *inventories {
 		inventorySerializers = append(inventorySerializers,
-			NewInventorySerializerFromDomain(inventory))
+			NewInventorySerializerFromDomain(&inventory))
 	}
 	return inventorySerializers
 }

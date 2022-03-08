@@ -1,15 +1,14 @@
 package repository
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
 )
 
 type IInventoryRepository interface {
-	All() ([]*domain.Inventory, errors.IBaseError)
-	Find(id string) (*domain.Inventory, errors.IBaseError)
-	Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError)
-	Update(id string, operationDate time.Time) errors.IBaseError
-	Delete(id string) errors.IBaseError
+	All() (*[]domain.Inventory, errors.IBaseError)
+	Find(id uint) (*domain.Inventory, errors.IBaseError)
+	Create(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError)
+	Update(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError)
+	Delete(instance *domain.Inventory) errors.IBaseError
 }

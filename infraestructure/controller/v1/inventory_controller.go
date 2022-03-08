@@ -28,15 +28,15 @@ func (inventoryController *InventoryController) Index(c *gin.Context) {
 }
 
 func (inventoryController *InventoryController) Get(c *gin.Context) {
-	id := c.Param("id")
-	inventory, err := inventoryController.inventoryApplication.Show(id)
-	if err != nil {
-		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
+	var inventorySerializer serializer.InventorySerializer
+	if err := c.ShouldBindUri(&inventorySerializer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if inventory == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "The requested resource doesn't exist (Inventory = " + id + ")"})
+	inventory, err := inventoryController.inventoryApplication.Show(inventorySerializer.Id)
+	if err != nil {
+		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -58,23 +58,32 @@ func (inventoryController *InventoryController) Create(c *gin.Context) {
 }
 
 func (inventoryController *InventoryController) Update(c *gin.Context) {
-	id := c.Param("id")
 	var inventorySerializer serializer.InventorySerializer
+	if err := c.ShouldBindUri(&inventorySerializer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	if err := c.ShouldBindJSON(&inventorySerializer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	err := inventoryController.inventoryApplication.Update(id, time.Time(inventorySerializer.OperationDate))
+	inventory, err := inventoryController.inventoryApplication.Update(inventorySerializer.Id, time.Time(inventorySerializer.OperationDate))
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, serializer.NewInventorySerializerFromDomain(inventory))
 }
 
 func (inventoryController *InventoryController) Delete(c *gin.Context) {
-	id := c.Param("id")
-	err := inventoryController.inventoryApplication.Delete(id)
+	var inventorySerializer serializer.InventorySerializer
+	if err := c.ShouldBindUri(&inventorySerializer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := inventoryController.inventoryApplication.Delete(inventorySerializer.Id)
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
