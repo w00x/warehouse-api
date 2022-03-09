@@ -6,30 +6,30 @@ import (
 	"warehouse/infraestructure/errors"
 )
 
-type InventoryRepository struct {
+type PriceRepository struct {
 	postgresBase *PostgresBase
 }
 
-func NewInventoryRepository() *InventoryRepository {
+func NewPriceRepository() *PriceRepository {
 	postgresBase := NewPostgresBase()
-	return &InventoryRepository{postgresBase}
+	return &PriceRepository{postgresBase}
 }
 
-func (r InventoryRepository) All() (*[]domain.Inventory, errors.IBaseError) {
-	var instances []domain.Inventory
-	result := r.postgresBase.DB.Model(&domain.Inventory{}).Scan(&instances)
+func (r PriceRepository) All() (*[]domain.Price, errors.IBaseError) {
+	var instances []domain.Price
+	result := r.postgresBase.DB.Model(&domain.Price{}).Scan(&instances)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 	return &instances, nil
 }
 
-func (r InventoryRepository) Find(id uint) (*domain.Inventory, errors.IBaseError) {
-	var instance domain.Inventory
+func (r PriceRepository) Find(id uint) (*domain.Price, errors.IBaseError) {
+	var instance domain.Price
 	result := r.postgresBase.DB.First(&instance, id)
 
 	if err := result.Error; err == gorm.ErrRecordNotFound {
-		return nil, errors.NewNotFoundError("Repository not found")
+		return nil, errors.NewNotFoundError("Price not found")
 	} else if err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -37,7 +37,7 @@ func (r InventoryRepository) Find(id uint) (*domain.Inventory, errors.IBaseError
 	return &instance, nil
 }
 
-func (r InventoryRepository) Create(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
+func (r PriceRepository) Create(instance *domain.Price) (*domain.Price, errors.IBaseError) {
 	result:= r.postgresBase.DB.Create(instance)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -45,13 +45,13 @@ func (r InventoryRepository) Create(instance *domain.Inventory) (*domain.Invento
 	count := result.RowsAffected
 
 	if count == 0 {
-		return nil, errors.NewNotFoundError("Repository not created")
+		return nil, errors.NewNotFoundError("Price not created")
 	}
 
 	return instance, nil
 }
 
-func (r InventoryRepository) Update(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
+func (r PriceRepository) Update(instance *domain.Price) (*domain.Price, errors.IBaseError) {
 	result := r.postgresBase.DB.Save(instance)
 
 	if err := result.Error; err != nil {
@@ -60,13 +60,13 @@ func (r InventoryRepository) Update(instance *domain.Inventory) (*domain.Invento
 	count := result.RowsAffected
 
 	if count == 0 {
-		return nil, errors.NewNotFoundError("Repository not updated")
+		return nil, errors.NewNotFoundError("Price not updated")
 	}
 
 	return instance, nil
 }
 
-func (r InventoryRepository) Delete(instance *domain.Inventory) errors.IBaseError {
+func (r PriceRepository) Delete(instance *domain.Price) errors.IBaseError {
 	result := r.postgresBase.DB.Delete(instance)
 
 	if err := result.Error; err != nil {
@@ -75,7 +75,7 @@ func (r InventoryRepository) Delete(instance *domain.Inventory) errors.IBaseErro
 	count := result.RowsAffected
 
 	if count == 0 {
-		return errors.NewNotFoundError("Repository not deleted")
+		return errors.NewNotFoundError("Price not deleted")
 	}
 
 	return nil

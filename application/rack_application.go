@@ -3,6 +3,7 @@ package application
 import (
 	"warehouse/domain"
 	"warehouse/domain/repository"
+	"warehouse/infraestructure/errors"
 )
 
 type RackApplication struct {
@@ -13,22 +14,22 @@ func NewRackApplication(rackRepository repository.IRackRepository) *RackApplicat
 	return &RackApplication{ rackRepository }
 }
 
-func (rackApplication *RackApplication) All() ([]*domain.Rack, error) {
+func (rackApplication *RackApplication) All() (*[]domain.Rack, errors.IBaseError) {
 	return rackApplication.rackRepository.All()
 }
 
-func (rackApplication *RackApplication) Show(id string) (*domain.Rack, error) {
+func (rackApplication *RackApplication) Show(id uint) (*domain.Rack, errors.IBaseError) {
 	return rackApplication.rackRepository.Find(id)
 }
 
-func (rackApplication *RackApplication) Update(id string, name string, code string) error {
-	return rackApplication.rackRepository.Update(id, name, code)
+func (rackApplication *RackApplication) Update(rack *domain.Rack) (*domain.Rack, errors.IBaseError) {
+	return rackApplication.rackRepository.Update(rack)
 }
 
-func (rackApplication *RackApplication) Create(name string, code string) (*domain.Rack, error) {
-	return rackApplication.rackRepository.Create(name, code)
+func (rackApplication *RackApplication) Create(rack *domain.Rack) (*domain.Rack, errors.IBaseError) {
+	return rackApplication.rackRepository.Create(rack)
 }
 
-func (rackApplication *RackApplication) Delete(id string) error {
-	return rackApplication.rackRepository.Delete(id)
+func (rackApplication *RackApplication) Delete(rack *domain.Rack) errors.IBaseError {
+	return rackApplication.rackRepository.Delete(rack)
 }

@@ -1,9 +1,9 @@
 package application
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/domain/repository"
+	"warehouse/infraestructure/errors"
 )
 
 type StockApplication struct {
@@ -14,27 +14,22 @@ func NewStockApplication(stockRepository repository.IStockRepository) *StockAppl
 	return &StockApplication{ stockRepository }
 }
 
-func (stockApplication *StockApplication) All() ([]*domain.Stock, error) {
+func (stockApplication *StockApplication) All() (*[]domain.Stock, errors.IBaseError) {
 	return stockApplication.stockRepository.All()
 }
 
-func (stockApplication *StockApplication) Show(id string) (*domain.Stock, error) {
+func (stockApplication *StockApplication) Show(id uint) (*domain.Stock, errors.IBaseError) {
 	return stockApplication.stockRepository.Find(id)
 }
 
-func (stockApplication *StockApplication) Update(id string, item *domain.Item, rack *domain.Rack,
-	quantity int, operationDate time.Time, expirationDate time.Time) error {
-	return stockApplication.stockRepository.Update(id, item, rack, quantity, operationDate,
-		expirationDate)
+func (stockApplication *StockApplication) Update(stock *domain.Stock) (*domain.Stock, errors.IBaseError) {
+	return stockApplication.stockRepository.Update(stock)
 }
 
-func (stockApplication *StockApplication) Create(item *domain.Item, rack *domain.Rack,
-	quantity int, operationDate time.Time,
-	expirationDate time.Time) (*domain.Stock, error) {
-	return stockApplication.stockRepository.Create(item, rack, quantity, operationDate,
-		expirationDate)
+func (stockApplication *StockApplication) Create(stock *domain.Stock) (*domain.Stock, errors.IBaseError) {
+	return stockApplication.stockRepository.Create(stock)
 }
 
-func (stockApplication *StockApplication) Delete(id string) error {
-	return stockApplication.stockRepository.Delete(id)
+func (stockApplication *StockApplication) Delete(stock *domain.Stock) errors.IBaseError {
+	return stockApplication.stockRepository.Delete(stock)
 }

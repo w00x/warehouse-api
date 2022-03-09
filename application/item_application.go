@@ -3,6 +3,7 @@ package application
 import (
 	"warehouse/domain"
 	"warehouse/domain/repository"
+	"warehouse/infraestructure/errors"
 )
 
 type ItemApplication struct {
@@ -13,28 +14,22 @@ func NewItemApplication(itemRepository repository.IItemRepository) *ItemApplicat
 	return &ItemApplication{ itemRepository }
 }
 
-func (itemApplication *ItemApplication) All() ([]*domain.Item, error) {
+func (itemApplication *ItemApplication) All() (*[]domain.Item, errors.IBaseError) {
 	return itemApplication.itemRepository.All()
 }
 
-func (itemApplication *ItemApplication) Show(id string) (*domain.Item, error) {
+func (itemApplication *ItemApplication) Show(id uint) (*domain.Item, errors.IBaseError) {
 	return itemApplication.itemRepository.Find(id)
 }
 
-func (itemApplication *ItemApplication) Update(id string, name string, unitSizePresentation string,
-	sizePresentation int,
-	code string, container string, photo string) error {
-	return itemApplication.itemRepository.Update(id, name, unitSizePresentation, sizePresentation,
-		code, container, photo)
+func (itemApplication *ItemApplication) Update(item *domain.Item) (*domain.Item, errors.IBaseError) {
+	return itemApplication.itemRepository.Update(item)
 }
 
-func (itemApplication *ItemApplication) Create(name string, unitSizePresentation string,
-	sizePresentation int, code string,
-	container string, photo string) (*domain.Item, error) {
-	return itemApplication.itemRepository.Create(name, unitSizePresentation, sizePresentation,
-		code, container, photo)
+func (itemApplication *ItemApplication) Create(item *domain.Item) (*domain.Item, errors.IBaseError) {
+	return itemApplication.itemRepository.Create(item)
 }
 
-func (itemApplication *ItemApplication) Delete(id string) error {
-	return itemApplication.itemRepository.Delete(id)
+func (itemApplication *ItemApplication) Delete(item *domain.Item) errors.IBaseError {
+	return itemApplication.itemRepository.Delete(item)
 }

@@ -1,11 +1,14 @@
 package repository
 
-import "warehouse/domain"
+import (
+	"warehouse/domain"
+	"warehouse/infraestructure/errors"
+)
 
 type IMarketRepository interface {
-	All() ([]*domain.Market, error)
-	Find(id string) (*domain.Market, error)
-	Update(id string, name string) error
-	Create(name string) (*domain.Market, error)
-	Delete(id string) error
+	All() 							(*[]domain.Market, errors.IBaseError)
+	Find(id uint) 					(*domain.Market, errors.IBaseError)
+	Create(instance *domain.Market) (*domain.Market, errors.IBaseError)
+	Update(instance *domain.Market) (*domain.Market, errors.IBaseError)
+	Delete(instance *domain.Market) errors.IBaseError
 }

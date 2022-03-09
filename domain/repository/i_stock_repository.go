@@ -1,16 +1,14 @@
 package repository
 
 import (
-	"time"
 	"warehouse/domain"
+	"warehouse/infraestructure/errors"
 )
 
 type IStockRepository interface {
-	All() ([]*domain.Stock, error)
-	Find(id string) (*domain.Stock, error)
-	Update(id string, item *domain.Item, rack *domain.Rack, quantity int, operationDate time.Time,
-		expirationDate time.Time) error
-	Create(item *domain.Item, rack *domain.Rack, quantity int, operationDate time.Time,
-		expirationDate time.Time) (*domain.Stock, error)
-	Delete(id string) error
+	All() 							(*[]domain.Stock, errors.IBaseError)
+	Find(id uint) 					(*domain.Stock, errors.IBaseError)
+	Create(instance *domain.Stock) 	(*domain.Stock, errors.IBaseError)
+	Update(instance *domain.Stock) 	(*domain.Stock, errors.IBaseError)
+	Delete(instance *domain.Stock) 	errors.IBaseError
 }

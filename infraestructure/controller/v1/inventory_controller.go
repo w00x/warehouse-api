@@ -3,7 +3,6 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 	"warehouse/application"
 	"warehouse/domain/repository"
 	"warehouse/infraestructure/serializer"
@@ -49,7 +48,7 @@ func (inventoryController *InventoryController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	inventory, err := inventoryController.inventoryApplication.Create(time.Time(inventorySerializer.OperationDate))
+	inventory, err := inventoryController.inventoryApplication.Create(inventorySerializer.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
@@ -68,7 +67,7 @@ func (inventoryController *InventoryController) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	inventory, err := inventoryController.inventoryApplication.Update(inventorySerializer.Id, time.Time(inventorySerializer.OperationDate))
+	inventory, err := inventoryController.inventoryApplication.Update(inventorySerializer.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
@@ -83,7 +82,7 @@ func (inventoryController *InventoryController) Delete(c *gin.Context) {
 		return
 	}
 
-	err := inventoryController.inventoryApplication.Delete(inventorySerializer.Id)
+	err := inventoryController.inventoryApplication.Delete(inventorySerializer.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return

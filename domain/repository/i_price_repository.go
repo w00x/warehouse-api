@@ -1,16 +1,14 @@
 package repository
 
 import (
-	"time"
 	"warehouse/domain"
+	"warehouse/infraestructure/errors"
 )
 
 type IPriceRepository interface {
-	All() ([]*domain.Price, error)
-	Find(id string) (*domain.Price, error)
-	Update(id string, market *domain.Market, item *domain.Item, price int,
-		date time.Time) error
-	Create(market *domain.Market, item *domain.Item, price int,
-		date time.Time) (*domain.Price, error)
-	Delete(id string) error
+	All() 							(*[]domain.Price, errors.IBaseError)
+	Find(id uint) 					(*domain.Price, errors.IBaseError)
+	Create(instance *domain.Price) 	(*domain.Price, errors.IBaseError)
+	Update(instance *domain.Price) 	(*domain.Price, errors.IBaseError)
+	Delete(instance *domain.Price) 	errors.IBaseError
 }

@@ -1,7 +1,6 @@
 package application
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/domain/repository"
 	"warehouse/infraestructure/errors"
@@ -23,24 +22,14 @@ func (inventoryApplication *InventoryApplication) Show(id uint) (*domain.Invento
 	return inventoryApplication.inventoryRepository.Find(id)
 }
 
-func (inventoryApplication *InventoryApplication) Update(id uint, operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
-	inventory, err := inventoryApplication.inventoryRepository.Find(id)
-	if err != nil {
-		return nil, err
-	}
-	inventory.OperationDate = operationDate
+func (inventoryApplication *InventoryApplication) Update(inventory *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
 	return inventoryApplication.inventoryRepository.Update(inventory)
 }
 
-func (inventoryApplication *InventoryApplication) Create(operationDate time.Time) (*domain.Inventory, errors.IBaseError) {
-	inventory := domain.NewInventory(0, operationDate)
+func (inventoryApplication *InventoryApplication) Create(inventory *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
 	return inventoryApplication.inventoryRepository.Create(inventory)
 }
 
-func (inventoryApplication *InventoryApplication) Delete(id uint) errors.IBaseError {
-	inventory, err := inventoryApplication.inventoryRepository.Find(id)
-	if err != nil {
-		return err
-	}
+func (inventoryApplication *InventoryApplication) Delete(inventory *domain.Inventory) errors.IBaseError {
 	return inventoryApplication.inventoryRepository.Delete(inventory)
 }

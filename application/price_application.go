@@ -1,9 +1,9 @@
 package application
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/domain/repository"
+	"warehouse/infraestructure/errors"
 )
 
 type PriceApplication struct {
@@ -14,24 +14,22 @@ func NewPriceApplication(priceRepository repository.IPriceRepository) *PriceAppl
 	return &PriceApplication{ priceRepository }
 }
 
-func (priceApplication *PriceApplication) All() ([]*domain.Price, error) {
+func (priceApplication *PriceApplication) All() (*[]domain.Price, errors.IBaseError) {
 	return priceApplication.priceRepository.All()
 }
 
-func (priceApplication *PriceApplication) Show(id string) (*domain.Price, error) {
+func (priceApplication *PriceApplication) Show(id uint) (*domain.Price, errors.IBaseError) {
 	return priceApplication.priceRepository.Find(id)
 }
 
-func (priceApplication *PriceApplication) Update(id string, market *domain.Market,
-	item *domain.Item, price int, date time.Time) error {
-	return priceApplication.priceRepository.Update(id, market, item, price, date)
+func (priceApplication *PriceApplication) Update(price *domain.Price) (*domain.Price, errors.IBaseError) {
+	return priceApplication.priceRepository.Update(price)
 }
 
-func (priceApplication *PriceApplication) Create(market *domain.Market,
-	item *domain.Item, price int, date time.Time) (*domain.Price, error) {
-	return priceApplication.priceRepository.Create(market, item, price, date)
+func (priceApplication *PriceApplication) Create(price *domain.Price) (*domain.Price, errors.IBaseError) {
+	return priceApplication.priceRepository.Create(price)
 }
 
-func (priceApplication *PriceApplication) Delete(id string) error {
-	return priceApplication.priceRepository.Delete(id)
+func (priceApplication *PriceApplication) Delete(price *domain.Price) errors.IBaseError {
+	return priceApplication.priceRepository.Delete(price)
 }
