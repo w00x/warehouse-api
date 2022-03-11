@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
+	"warehouse/infraestructure/repository/models"
 )
 
 type PriceRepository struct {
@@ -17,7 +18,7 @@ func NewPriceRepository() *PriceRepository {
 
 func (r PriceRepository) All() (*[]domain.Price, errors.IBaseError) {
 	var instances []domain.Price
-	result := r.postgresBase.DB.Model(&domain.Price{}).Scan(&instances)
+	result := r.postgresBase.DB.Joins("Market").Joins("Item").Model(&models.Price{}).Scan(&instances)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -25,8 +26,8 @@ func (r PriceRepository) All() (*[]domain.Price, errors.IBaseError) {
 }
 
 func (r PriceRepository) Find(id uint) (*domain.Price, errors.IBaseError) {
-	var instance domain.Price
-	result := r.postgresBase.DB.First(&instance, id)
+	var instance models.Price
+	result := r.postgresBase.DB.Joins("Market").Joins("Item").First(&instance, id)
 
 	if err := result.Error; err == gorm.ErrRecordNotFound {
 		return nil, errors.NewNotFoundError("Price not found")
@@ -34,11 +35,12 @@ func (r PriceRepository) Find(id uint) (*domain.Price, errors.IBaseError) {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 
-	return &instance, nil
+	return instance.ToDomain(), nil
 }
 
 func (r PriceRepository) Create(instance *domain.Price) (*domain.Price, errors.IBaseError) {
-	result:= r.postgresBase.DB.Create(instance)
+	model := models.FromPriceDomainToModel(instance)
+	result:= r.postgresBase.DB.Create(model)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -48,11 +50,12 @@ func (r PriceRepository) Create(instance *domain.Price) (*domain.Price, errors.I
 		return nil, errors.NewNotFoundError("Price not created")
 	}
 
-	return instance, nil
+	return model.ToDomain(), nil
 }
 
 func (r PriceRepository) Update(instance *domain.Price) (*domain.Price, errors.IBaseError) {
-	result := r.postgresBase.DB.Save(instance)
+	model := models.FromPriceDomainToModel(instance)
+	result := r.postgresBase.DB.Save(model)
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -63,11 +66,11 @@ func (r PriceRepository) Update(instance *domain.Price) (*domain.Price, errors.I
 		return nil, errors.NewNotFoundError("Price not updated")
 	}
 
-	return instance, nil
+	return model.ToDomain(), nil
 }
 
 func (r PriceRepository) Delete(instance *domain.Price) errors.IBaseError {
-	result := r.postgresBase.DB.Delete(instance)
+	result := r.postgresBase.DB.Delete(models.FromPriceDomainToModel(instance))
 
 	if err := result.Error; err != nil {
 		return errors.NewInternalServerError(err.Error())

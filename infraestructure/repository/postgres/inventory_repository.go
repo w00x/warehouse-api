@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
+	"warehouse/infraestructure/repository/models"
 )
 
 type InventoryRepository struct {
@@ -17,7 +18,7 @@ func NewInventoryRepository() *InventoryRepository {
 
 func (r InventoryRepository) All() (*[]domain.Inventory, errors.IBaseError) {
 	var instances []domain.Inventory
-	result := r.postgresBase.DB.Model(&domain.Inventory{}).Scan(&instances)
+	result := r.postgresBase.DB.Model(&models.Inventory{}).Scan(&instances)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -25,7 +26,7 @@ func (r InventoryRepository) All() (*[]domain.Inventory, errors.IBaseError) {
 }
 
 func (r InventoryRepository) Find(id uint) (*domain.Inventory, errors.IBaseError) {
-	var instance domain.Inventory
+	var instance models.Inventory
 	result := r.postgresBase.DB.First(&instance, id)
 
 	if err := result.Error; err == gorm.ErrRecordNotFound {
@@ -34,11 +35,12 @@ func (r InventoryRepository) Find(id uint) (*domain.Inventory, errors.IBaseError
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 
-	return &instance, nil
+	return instance.ToDomain(), nil
 }
 
 func (r InventoryRepository) Create(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
-	result:= r.postgresBase.DB.Create(instance)
+	model := models.FromInventoryDomainToModel(instance)
+	result:= r.postgresBase.DB.Create(model)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -48,11 +50,12 @@ func (r InventoryRepository) Create(instance *domain.Inventory) (*domain.Invento
 		return nil, errors.NewNotFoundError("Repository not created")
 	}
 
-	return instance, nil
+	return model.ToDomain(), nil
 }
 
 func (r InventoryRepository) Update(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
-	result := r.postgresBase.DB.Save(instance)
+	model := models.FromInventoryDomainToModel(instance)
+	result := r.postgresBase.DB.Save(model)
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -63,11 +66,12 @@ func (r InventoryRepository) Update(instance *domain.Inventory) (*domain.Invento
 		return nil, errors.NewNotFoundError("Repository not updated")
 	}
 
-	return instance, nil
+	return model.ToDomain(), nil
 }
 
 func (r InventoryRepository) Delete(instance *domain.Inventory) errors.IBaseError {
-	result := r.postgresBase.DB.Delete(instance)
+	model := models.FromInventoryDomainToModel(instance)
+	result := r.postgresBase.DB.Delete(model)
 
 	if err := result.Error; err != nil {
 		return errors.NewInternalServerError(err.Error())

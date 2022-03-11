@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
+	"warehouse/infraestructure/repository/models"
 )
 
 type RackRepository struct {
@@ -17,7 +18,7 @@ func NewRackRepository() *RackRepository {
 
 func (r RackRepository) All() (*[]domain.Rack, errors.IBaseError) {
 	var instances []domain.Rack
-	result := r.postgresBase.DB.Model(&domain.Rack{}).Scan(&instances)
+	result := r.postgresBase.DB.Model(&models.Rack{}).Scan(&instances)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -25,7 +26,7 @@ func (r RackRepository) All() (*[]domain.Rack, errors.IBaseError) {
 }
 
 func (r RackRepository) Find(id uint) (*domain.Rack, errors.IBaseError) {
-	var instance domain.Rack
+	var instance models.Rack
 	result := r.postgresBase.DB.First(&instance, id)
 
 	if err := result.Error; err == gorm.ErrRecordNotFound {
@@ -34,11 +35,12 @@ func (r RackRepository) Find(id uint) (*domain.Rack, errors.IBaseError) {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 
-	return &instance, nil
+	return instance.ToDomain(), nil
 }
 
 func (r RackRepository) Create(instance *domain.Rack) (*domain.Rack, errors.IBaseError) {
-	result:= r.postgresBase.DB.Create(instance)
+	model := models.FromRackDomainToModel(instance)
+	result:= r.postgresBase.DB.Create(model)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
@@ -48,11 +50,12 @@ func (r RackRepository) Create(instance *domain.Rack) (*domain.Rack, errors.IBas
 		return nil, errors.NewNotFoundError("Rack not created")
 	}
 
-	return instance, nil
+	return model.ToDomain(), nil
 }
 
 func (r RackRepository) Update(instance *domain.Rack) (*domain.Rack, errors.IBaseError) {
-	result := r.postgresBase.DB.Save(instance)
+	model := models.FromRackDomainToModel(instance)
+	result := r.postgresBase.DB.Save(model)
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -63,11 +66,11 @@ func (r RackRepository) Update(instance *domain.Rack) (*domain.Rack, errors.IBas
 		return nil, errors.NewNotFoundError("Rack not updated")
 	}
 
-	return instance, nil
+	return model.ToDomain(), nil
 }
 
 func (r RackRepository) Delete(instance *domain.Rack) errors.IBaseError {
-	result := r.postgresBase.DB.Delete(instance)
+	result := r.postgresBase.DB.Delete(models.FromRackDomainToModel(instance))
 
 	if err := result.Error; err != nil {
 		return errors.NewInternalServerError(err.Error())

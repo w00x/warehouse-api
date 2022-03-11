@@ -1,7 +1,7 @@
 package domain
 
 type Item struct {
-	Id 						string
+	Id 						uint
 	Name                 	string
 	UnitSizePresentation 	string
 	SizePresentation     	int
@@ -10,7 +10,7 @@ type Item struct {
 	Photo 					string
 }
 
-func NewItem(id string, name string, unitSizePresentation string, sizePresentation int,
+func NewItem(id uint, name string, unitSizePresentation string, sizePresentation int,
 	code string, container string, photo string) *Item {
 	return &Item{Id: id, Name: name, UnitSizePresentation: unitSizePresentation,
 		SizePresentation: sizePresentation, Code: code, Container: container, Photo: photo}

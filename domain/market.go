@@ -1,10 +1,10 @@
 package domain
 
 type Market struct {
-	Id		string
-	Name 	string
+	Id			uint
+	Name 		string
 }
 
-func NewMarket(id string, name string) *Market {
+func NewMarket(id uint, name string) *Market {
 	return &Market{Id: id, Name: name}
 }
