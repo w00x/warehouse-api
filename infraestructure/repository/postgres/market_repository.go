@@ -54,13 +54,12 @@ func (r MarketRepository) Create(instance *domain.Market) (*domain.Market, error
 }
 
 func (r MarketRepository) Update(instance *domain.Market) (*domain.Market, errors.IBaseError) {
-	model := models.FromMarketDomainToModel(instance)
-	d, err := r.Find(model.Id)
+	d, err := r.Find(instance.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	result := r.postgresBase.DB.Model(d).Updates(model.ToStruct())
+	result := r.postgresBase.DB.Model(d).Updates(instance)
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -71,7 +70,7 @@ func (r MarketRepository) Update(instance *domain.Market) (*domain.Market, error
 		return nil, errors.NewNotFoundError("Market not updated")
 	}
 
-	return r.Find(model.Id)
+	return r.Find(instance.Id)
 }
 
 func (r MarketRepository) Delete(instance *domain.Market) errors.IBaseError {

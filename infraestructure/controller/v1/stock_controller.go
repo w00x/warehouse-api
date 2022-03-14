@@ -27,7 +27,7 @@ func (stockController *StockController) Index(c *gin.Context) {
 }
 
 func (stockController *StockController) Get(c *gin.Context) {
-	var stockSerializer serializer.StockSerializer
+	var stockSerializer serializer.StockRequestSerializer
 	if err := c.ShouldBindUri(&stockSerializer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +43,7 @@ func (stockController *StockController) Get(c *gin.Context) {
 }
 
 func (stockController *StockController) Create(c *gin.Context) {
-	var stockSerializer serializer.StockSerializer
+	var stockSerializer serializer.StockRequestSerializer
 	if err := c.ShouldBindJSON(&stockSerializer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
@@ -57,7 +57,7 @@ func (stockController *StockController) Create(c *gin.Context) {
 }
 
 func (stockController *StockController) Update(c *gin.Context) {
-	var stockSerializer serializer.StockSerializer
+	var stockSerializer serializer.StockRequestSerializer
 	if err := c.ShouldBindUri(&stockSerializer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -76,7 +76,7 @@ func (stockController *StockController) Update(c *gin.Context) {
 }
 
 func (stockController *StockController) Delete(c *gin.Context) {
-	var stockSerializer serializer.StockSerializer
+	var stockSerializer serializer.StockRequestSerializer
 	if err := c.ShouldBindUri(&stockSerializer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

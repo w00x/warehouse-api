@@ -39,13 +39,3 @@ func (i Stock) ToDomain() *domain.Stock {
 	}
 	return domain.NewStock(i.Id, item, rack, i.Quantity, i.OperationDate, i.ExpirationDate, i.RackId, i.ItemId)
 }
-
-func (i Stock) ToStruct() map[string]interface{} {
-	return map[string]interface{}{
-		"item_id": i.ItemId,
-		"rack_id": i.RackId,
-		"quantity": i.Quantity,
-		"operation_date": i.OperationDate,
-		"expiration_date": i.ExpirationDate,
-	}
-}

@@ -27,10 +27,3 @@ func FromRackDomainToModel(i *domain.Rack) *Rack {
 func (i Rack) ToDomain() *domain.Rack {
 	return domain.NewRack(i.Id, i.Name, i.Code)
 }
-
-func (i Rack) ToStruct() map[string]interface{} {
-	return map[string]interface{}{
-		"name": i.Name,
-		"code": i.Code,
-	}
-}

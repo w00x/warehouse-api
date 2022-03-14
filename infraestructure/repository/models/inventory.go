@@ -23,9 +23,3 @@ func FromInventoryDomainToModel(i *domain.Inventory) *Inventory {
 func (i Inventory) ToDomain() *domain.Inventory {
 	return domain.NewInventory(i.Id, i.OperationDate)
 }
-
-func (i Inventory) ToStruct() map[string]interface{} {
-	return map[string]interface{}{
-		"operation_date": i.OperationDate,
-	}
-}

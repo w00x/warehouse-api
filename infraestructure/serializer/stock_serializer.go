@@ -6,7 +6,7 @@ import (
 	"warehouse/shared"
 )
 
-type StockSerializer struct {
+type StockRequestSerializer struct {
 	Id				uint 				`json:"id" uri:"id"`
 	ItemId 			uint				`json:"item_id"`
 	RackId 			uint				`json:"rack_id"`
@@ -15,7 +15,7 @@ type StockSerializer struct {
 	ExpirationDate 	shared.DateTime		`json:"expiration_date"`
 }
 
-func (s StockSerializer) ToDomain() *domain.Stock {
+func (s StockRequestSerializer) ToDomain() *domain.Stock {
 	return domain.NewStock(s.Id, nil, nil, s.Quantity,
 		time.Time(s.OperationDate), time.Time(s.ExpirationDate), s.ItemId, s.RackId)
 }

@@ -27,7 +27,7 @@ func (priceController *PriceController) Index(c *gin.Context) {
 }
 
 func (priceController *PriceController) Get(c *gin.Context) {
-	var priceSerializer serializer.PriceSerializer
+	var priceSerializer serializer.PriceRequesSerializer
 	if err := c.ShouldBindUri(&priceSerializer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +43,7 @@ func (priceController *PriceController) Get(c *gin.Context) {
 }
 
 func (priceController *PriceController) Create(c *gin.Context) {
-	var priceSerializer serializer.PriceSerializer
+	var priceSerializer serializer.PriceRequesSerializer
 	if err := c.ShouldBindJSON(&priceSerializer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
@@ -57,7 +57,7 @@ func (priceController *PriceController) Create(c *gin.Context) {
 }
 
 func (priceController *PriceController) Update(c *gin.Context) {
-	var priceSerializer serializer.PriceSerializer
+	var priceSerializer serializer.PriceRequesSerializer
 	if err := c.ShouldBindUri(&priceSerializer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -76,7 +76,7 @@ func (priceController *PriceController) Update(c *gin.Context) {
 }
 
 func (priceController *PriceController) Delete(c *gin.Context) {
-	var priceSerializer serializer.PriceSerializer
+	var priceSerializer serializer.PriceRequesSerializer
 	if err := c.ShouldBindUri(&priceSerializer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
