@@ -34,3 +34,16 @@ func FromItemDomainToModel(i *domain.Item) *Item {
 func (i Item) ToDomain() *domain.Item {
 	return domain.NewItem(i.Id, i.Name, i.UnitSizePresentation, i.SizePresentation, i.Code, i.Container, i.Photo)
 }
+
+func (i Item) ToStruct() map[string]interface{} {
+	response := map[string]interface{}{
+		"name": i.Name,
+		"unit_size_presentation": i.UnitSizePresentation,
+		"size_presentation": i.SizePresentation,
+		"code": i.Code,
+		"container": i.Container,
+		"photo": i.Photo,
+	}
+
+	return response
+}

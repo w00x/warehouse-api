@@ -50,12 +50,17 @@ func (r PriceRepository) Create(instance *domain.Price) (*domain.Price, errors.I
 		return nil, errors.NewNotFoundError("Price not created")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r PriceRepository) Update(instance *domain.Price) (*domain.Price, errors.IBaseError) {
 	model := models.FromPriceDomainToModel(instance)
-	result := r.postgresBase.DB.Save(model)
+	d, err := r.Find(model.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	result := r.postgresBase.DB.Model(d).Updates(model.ToStruct())
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -66,7 +71,7 @@ func (r PriceRepository) Update(instance *domain.Price) (*domain.Price, errors.I
 		return nil, errors.NewNotFoundError("Price not updated")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r PriceRepository) Delete(instance *domain.Price) errors.IBaseError {

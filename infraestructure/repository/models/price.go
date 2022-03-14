@@ -36,3 +36,17 @@ func (i Price) ToDomain() *domain.Price {
 	}
 	return domain.NewPrice(i.Id, market, item, i.Price, i.Date, i.ItemId, i.MarketId)
 }
+
+func (i Price) ToStruct() map[string]interface{} {
+	response := map[string]interface{}{
+		"market_id": i.MarketId,
+		"item_id": i.ItemId,
+		"price": i.Price,
+	}
+
+	date := &i.Date
+	if !date.IsZero() {
+		response["date"] = date
+	}
+	return response
+}

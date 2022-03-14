@@ -23,7 +23,7 @@ func (priceController *PriceController) Index(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewPriceListSerializerFromDomains(inventories))
+	c.JSON(http.StatusOK, serializer.NewPriceResponseListSerializerFromDomains(inventories))
 }
 
 func (priceController *PriceController) Get(c *gin.Context) {
@@ -39,7 +39,7 @@ func (priceController *PriceController) Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, serializer.NewPriceSerializerFromDomain(price))
+	c.JSON(http.StatusOK, serializer.NewPriceResponseSerializerFromDomain(price))
 }
 
 func (priceController *PriceController) Create(c *gin.Context) {
@@ -53,7 +53,7 @@ func (priceController *PriceController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewPriceSerializerFromDomain(price))
+	c.JSON(http.StatusOK, serializer.NewPriceResponseSerializerFromDomain(price))
 }
 
 func (priceController *PriceController) Update(c *gin.Context) {
@@ -72,7 +72,7 @@ func (priceController *PriceController) Update(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewPriceSerializerFromDomain(price))
+	c.JSON(http.StatusOK, serializer.NewPriceResponseSerializerFromDomain(price))
 }
 
 func (priceController *PriceController) Delete(c *gin.Context) {

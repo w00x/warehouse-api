@@ -50,12 +50,17 @@ func (r InventoryRepository) Create(instance *domain.Inventory) (*domain.Invento
 		return nil, errors.NewNotFoundError("Repository not created")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r InventoryRepository) Update(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError) {
 	model := models.FromInventoryDomainToModel(instance)
-	result := r.postgresBase.DB.Save(model)
+	d, err := r.Find(model.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	result := r.postgresBase.DB.Model(d).Updates(model.ToStruct())
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -66,7 +71,7 @@ func (r InventoryRepository) Update(instance *domain.Inventory) (*domain.Invento
 		return nil, errors.NewNotFoundError("Repository not updated")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r InventoryRepository) Delete(instance *domain.Inventory) errors.IBaseError {

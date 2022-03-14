@@ -26,3 +26,9 @@ func FromMarketDomainToModel(i *domain.Market) *Market {
 func (i Market) ToDomain() *domain.Market {
 	return domain.NewMarket(i.Id, i.Name)
 }
+
+func (i Market) ToStruct() map[string]interface{} {
+	return map[string]interface{}{
+		"name": i.Name,
+	}
+}

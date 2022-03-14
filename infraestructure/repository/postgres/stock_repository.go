@@ -50,12 +50,17 @@ func (r StockRepository) Create(instance *domain.Stock) (*domain.Stock, errors.I
 		return nil, errors.NewNotFoundError("Stock not created")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r StockRepository) Update(instance *domain.Stock) (*domain.Stock, errors.IBaseError) {
 	model := models.FromStockDomainToModel(instance)
-	result := r.postgresBase.DB.Save(model)
+	d, err := r.Find(model.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	result := r.postgresBase.DB.Model(d).Updates(model.ToStruct())
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -66,7 +71,7 @@ func (r StockRepository) Update(instance *domain.Stock) (*domain.Stock, errors.I
 		return nil, errors.NewNotFoundError("Stock not updated")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r StockRepository) Delete(instance *domain.Stock) errors.IBaseError {

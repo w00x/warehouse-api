@@ -50,12 +50,17 @@ func (r RackRepository) Create(instance *domain.Rack) (*domain.Rack, errors.IBas
 		return nil, errors.NewNotFoundError("Rack not created")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r RackRepository) Update(instance *domain.Rack) (*domain.Rack, errors.IBaseError) {
 	model := models.FromRackDomainToModel(instance)
-	result := r.postgresBase.DB.Save(model)
+	d, err := r.Find(model.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	result := r.postgresBase.DB.Model(d).Updates(model.ToStruct())
 
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -66,7 +71,7 @@ func (r RackRepository) Update(instance *domain.Rack) (*domain.Rack, errors.IBas
 		return nil, errors.NewNotFoundError("Rack not updated")
 	}
 
-	return model.ToDomain(), nil
+	return r.Find(model.Id)
 }
 
 func (r RackRepository) Delete(instance *domain.Rack) errors.IBaseError {

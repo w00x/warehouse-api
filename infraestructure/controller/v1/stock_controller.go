@@ -23,7 +23,7 @@ func (stockController *StockController) Index(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewStockListSerializerFromDomains(inventories))
+	c.JSON(http.StatusOK, serializer.NewStockListResponseSerializerFromDomains(inventories))
 }
 
 func (stockController *StockController) Get(c *gin.Context) {
@@ -39,7 +39,7 @@ func (stockController *StockController) Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, serializer.NewStockSerializerFromDomain(stock))
+	c.JSON(http.StatusOK, serializer.NewStockResponseSerializerFromDomain(stock))
 }
 
 func (stockController *StockController) Create(c *gin.Context) {
@@ -53,7 +53,7 @@ func (stockController *StockController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewStockSerializerFromDomain(stock))
+	c.JSON(http.StatusOK, serializer.NewStockResponseSerializerFromDomain(stock))
 }
 
 func (stockController *StockController) Update(c *gin.Context) {
@@ -72,7 +72,7 @@ func (stockController *StockController) Update(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewStockSerializerFromDomain(stock))
+	c.JSON(http.StatusOK, serializer.NewStockResponseSerializerFromDomain(stock))
 }
 
 func (stockController *StockController) Delete(c *gin.Context) {
