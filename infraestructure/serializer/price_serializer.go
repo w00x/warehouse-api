@@ -1,7 +1,6 @@
 package serializer
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/shared"
 )
@@ -15,5 +14,5 @@ type PriceRequesSerializer struct {
 }
 
 func (ps PriceRequesSerializer) ToDomain() *domain.Price {
-	return domain.NewPrice(ps.Id, nil, nil, ps.Price, time.Time(ps.Date), ps.ItemId, ps.MarketId)
+	return domain.NewPrice(ps.Id, nil, nil, ps.Price, ps.Date, ps.ItemId, ps.MarketId)
 }

@@ -1,7 +1,6 @@
 package serializer
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/shared"
 )
@@ -29,5 +28,5 @@ func NewInventoryListSerializerFromDomains(inventories *[]domain.Inventory) []*I
 }
 
 func (ise InventorySerializer) ToDomain() *domain.Inventory {
-	return domain.NewInventory(ise.Id, time.Time(ise.OperationDate))
+	return domain.NewInventory(ise.Id, ise.OperationDate)
 }

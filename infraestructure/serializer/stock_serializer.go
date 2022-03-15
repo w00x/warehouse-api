@@ -1,7 +1,6 @@
 package serializer
 
 import (
-	"time"
 	"warehouse/domain"
 	"warehouse/shared"
 )
@@ -17,5 +16,5 @@ type StockRequestSerializer struct {
 
 func (s StockRequestSerializer) ToDomain() *domain.Stock {
 	return domain.NewStock(s.Id, nil, nil, s.Quantity,
-		time.Time(s.OperationDate), time.Time(s.ExpirationDate), s.ItemId, s.RackId)
+		s.OperationDate, s.ExpirationDate, s.ItemId, s.RackId)
 }

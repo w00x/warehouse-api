@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"time"
+	"warehouse/shared"
 )
 
 type Stock struct {
@@ -11,12 +11,12 @@ type Stock struct {
 	RackId			uint
 	Rack 			*Rack
 	Quantity        int
-	OperationDate  	time.Time
-	ExpirationDate 	time.Time
+	OperationDate  	shared.DateTime
+	ExpirationDate 	shared.DateTime
 }
 
-func NewStock(id uint, item *Item, rack *Rack, quantity int, operationDate time.Time,
-	expirationDate time.Time, ItemId uint, RackId uint) *Stock {
+func NewStock(id uint, item *Item, rack *Rack, quantity int, operationDate shared.DateTime,
+	expirationDate shared.DateTime, ItemId uint, RackId uint) *Stock {
 	return &Stock{Id: id, Item: item, Rack: rack, Quantity: quantity, OperationDate: operationDate,
 		ExpirationDate: expirationDate, ItemId: ItemId, RackId: RackId}
 }
