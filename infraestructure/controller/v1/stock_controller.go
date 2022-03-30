@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"warehouse/application"
 	"warehouse/domain/repository"
-	"warehouse/infraestructure/serializer"
+	"warehouse/infraestructure/dto"
 )
 
 type StockController struct {
@@ -23,66 +23,66 @@ func (stockController *StockController) Index(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewStockListResponseSerializerFromDomains(inventories))
+	c.JSON(http.StatusOK, dto.NewStockListResponseDtoFromDomains(inventories))
 }
 
 func (stockController *StockController) Get(c *gin.Context) {
-	var stockSerializer serializer.StockRequestSerializer
-	if err := c.ShouldBindUri(&stockSerializer); err != nil {
+	var stockDto dto.StockRequestDto
+	if err := c.ShouldBindUri(&stockDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	stock, err := stockController.stockApplication.Show(stockSerializer.Id)
+	stock, err := stockController.stockApplication.Show(stockDto.Id)
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, serializer.NewStockResponseSerializerFromDomain(stock))
+	c.JSON(http.StatusOK, dto.NewStockResponseDtoFromDomain(stock))
 }
 
 func (stockController *StockController) Create(c *gin.Context) {
-	var stockSerializer serializer.StockRequestSerializer
-	if err := c.ShouldBindJSON(&stockSerializer); err != nil {
+	var stockDto dto.StockRequestDto
+	if err := c.ShouldBindJSON(&stockDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	stock, err := stockController.stockApplication.Create(stockSerializer.ToDomain())
+	stock, err := stockController.stockApplication.Create(stockDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusCreated, serializer.NewStockResponseSerializerFromDomain(stock))
+	c.JSON(http.StatusCreated, dto.NewStockResponseDtoFromDomain(stock))
 }
 
 func (stockController *StockController) Update(c *gin.Context) {
-	var stockSerializer serializer.StockRequestSerializer
-	if err := c.ShouldBindUri(&stockSerializer); err != nil {
+	var stockDto dto.StockRequestDto
+	if err := c.ShouldBindUri(&stockDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&stockSerializer); err != nil {
+	if err := c.ShouldBindJSON(&stockDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	stock, err := stockController.stockApplication.Update(stockSerializer.ToDomain())
+	stock, err := stockController.stockApplication.Update(stockDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewStockResponseSerializerFromDomain(stock))
+	c.JSON(http.StatusOK, dto.NewStockResponseDtoFromDomain(stock))
 }
 
 func (stockController *StockController) Delete(c *gin.Context) {
-	var stockSerializer serializer.StockRequestSerializer
-	if err := c.ShouldBindUri(&stockSerializer); err != nil {
+	var stockDto dto.StockRequestDto
+	if err := c.ShouldBindUri(&stockDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := stockController.stockApplication.Delete(stockSerializer.ToDomain())
+	err := stockController.stockApplication.Delete(stockDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return

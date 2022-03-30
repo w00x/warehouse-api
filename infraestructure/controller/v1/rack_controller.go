@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"warehouse/application"
 	"warehouse/domain/repository"
-	"warehouse/infraestructure/serializer"
+	"warehouse/infraestructure/dto"
 )
 
 type RackController struct {
@@ -23,66 +23,66 @@ func (rackController *RackController) Index(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewRackListSerializerFromDomains(inventories))
+	c.JSON(http.StatusOK, dto.NewRackListDtoFromDomains(inventories))
 }
 
 func (rackController *RackController) Get(c *gin.Context) {
-	var rackSerializer serializer.RackSerializer
-	if err := c.ShouldBindUri(&rackSerializer); err != nil {
+	var rackDto dto.RackDto
+	if err := c.ShouldBindUri(&rackDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	rack, err := rackController.rackApplication.Show(rackSerializer.Id)
+	rack, err := rackController.rackApplication.Show(rackDto.Id)
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, serializer.NewRackSerializerFromDomain(rack))
+	c.JSON(http.StatusOK, dto.NewRackDtoFromDomain(rack))
 }
 
 func (rackController *RackController) Create(c *gin.Context) {
-	var rackSerializer serializer.RackSerializer
-	if err := c.ShouldBindJSON(&rackSerializer); err != nil {
+	var rackDto dto.RackDto
+	if err := c.ShouldBindJSON(&rackDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	rack, err := rackController.rackApplication.Create(rackSerializer.ToDomain())
+	rack, err := rackController.rackApplication.Create(rackDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusCreated, serializer.NewRackSerializerFromDomain(rack))
+	c.JSON(http.StatusCreated, dto.NewRackDtoFromDomain(rack))
 }
 
 func (rackController *RackController) Update(c *gin.Context) {
-	var rackSerializer serializer.RackSerializer
-	if err := c.ShouldBindUri(&rackSerializer); err != nil {
+	var rackDto dto.RackDto
+	if err := c.ShouldBindUri(&rackDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&rackSerializer); err != nil {
+	if err := c.ShouldBindJSON(&rackDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	rack, err := rackController.rackApplication.Update(rackSerializer.ToDomain())
+	rack, err := rackController.rackApplication.Update(rackDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewRackSerializerFromDomain(rack))
+	c.JSON(http.StatusOK, dto.NewRackDtoFromDomain(rack))
 }
 
 func (rackController *RackController) Delete(c *gin.Context) {
-	var rackSerializer serializer.RackSerializer
-	if err := c.ShouldBindUri(&rackSerializer); err != nil {
+	var rackDto dto.RackDto
+	if err := c.ShouldBindUri(&rackDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := rackController.rackApplication.Delete(rackSerializer.ToDomain())
+	err := rackController.rackApplication.Delete(rackDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return

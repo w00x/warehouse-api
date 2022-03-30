@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"warehouse/application"
 	"warehouse/domain/repository"
-	"warehouse/infraestructure/serializer"
+	"warehouse/infraestructure/dto"
 )
 
 type ItemController struct {
@@ -23,66 +23,66 @@ func (itemController *ItemController) Index(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewItemListSerializerFromDomains(inventories))
+	c.JSON(http.StatusOK, dto.NewItemListDtoFromDomains(inventories))
 }
 
 func (itemController *ItemController) Get(c *gin.Context) {
-	var itemSerializer serializer.ItemSerializer
-	if err := c.ShouldBindUri(&itemSerializer); err != nil {
+	var itemDto dto.ItemDto
+	if err := c.ShouldBindUri(&itemDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	item, err := itemController.itemApplication.Show(itemSerializer.Id)
+	item, err := itemController.itemApplication.Show(itemDto.Id)
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, serializer.NewItemSerializerFromDomain(item))
+	c.JSON(http.StatusOK, dto.NewItemDtoFromDomain(item))
 }
 
 func (itemController *ItemController) Create(c *gin.Context) {
-	var itemSerializer serializer.ItemSerializer
-	if err := c.ShouldBindJSON(&itemSerializer); err != nil {
+	var itemDto dto.ItemDto
+	if err := c.ShouldBindJSON(&itemDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	item, err := itemController.itemApplication.Create(itemSerializer.ToDomain())
+	item, err := itemController.itemApplication.Create(itemDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusCreated, serializer.NewItemSerializerFromDomain(item))
+	c.JSON(http.StatusCreated, dto.NewItemDtoFromDomain(item))
 }
 
 func (itemController *ItemController) Update(c *gin.Context) {
-	var itemSerializer serializer.ItemSerializer
-	if err := c.ShouldBindUri(&itemSerializer); err != nil {
+	var itemDto dto.ItemDto
+	if err := c.ShouldBindUri(&itemDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&itemSerializer); err != nil {
+	if err := c.ShouldBindJSON(&itemDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{ "error": err.Error() })
 		return
 	}
-	item, err := itemController.itemApplication.Update(itemSerializer.ToDomain())
+	item, err := itemController.itemApplication.Update(itemDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewItemSerializerFromDomain(item))
+	c.JSON(http.StatusOK, dto.NewItemDtoFromDomain(item))
 }
 
 func (itemController *ItemController) Delete(c *gin.Context) {
-	var itemSerializer serializer.ItemSerializer
-	if err := c.ShouldBindUri(&itemSerializer); err != nil {
+	var itemDto dto.ItemDto
+	if err := c.ShouldBindUri(&itemDto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := itemController.itemApplication.Delete(itemSerializer.ToDomain())
+	err := itemController.itemApplication.Delete(itemDto.ToDomain())
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
