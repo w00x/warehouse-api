@@ -9,7 +9,7 @@ type PriceRequesSerializer struct {
 	Id			uint 				`json:"id" uri:"id"`
 	MarketId 	uint				`json:"market_id"`
 	ItemId      uint				`json:"item_id"`
-	Price 		int					`json:"price"`
+	Price 		float64					`json:"price"`
 	Date 		shared.DateTime		`json:"date"`
 }
 

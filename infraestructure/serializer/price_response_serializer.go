@@ -9,11 +9,11 @@ type PriceResponseSerializer struct {
 	Id			uint 				`json:"id" uri:"id"`
 	Market 		*MarketSerializer	`json:"market"`
 	Item        *ItemSerializer		`json:"item"`
-	Price 		int					`json:"price"`
+	Price 		float64				`json:"price"`
 	Date 		shared.DateTime		`json:"date"`
 }
 
-func NewPriceResponseSerializer(id uint, market *MarketSerializer, item *ItemSerializer, price int,
+func NewPriceResponseSerializer(id uint, market *MarketSerializer, item *ItemSerializer, price float64,
 	date shared.DateTime) *PriceResponseSerializer {
 	return &PriceResponseSerializer{Id: id, Market: market, Item: item, Price: price, Date: date}
 }

@@ -21,6 +21,17 @@ func (i Item) ToDomain() *domain.Item {
 	return domain.NewItem(0, i.Name, i.UnitSizePresentation, i.SizePresentation, i.Code, i.Container, i.Photo)
 }
 
+func FromItemDomainToFactory(item *domain.Item) *Item {
+	return &Item{
+		Name:                 item.Name,
+		UnitSizePresentation: item.UnitSizePresentation,
+		SizePresentation:     item.SizePresentation,
+		Code:                 item.Code,
+		Container:            item.Container,
+		Photo:                item.Photo,
+	}
+}
+
 func NewItemFactory(t *testing.T) *domain.Item {
 	Item := &Item{}
 	err := faker.FakeData(Item)

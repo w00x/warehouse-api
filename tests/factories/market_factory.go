@@ -16,6 +16,10 @@ func (i Market) ToDomain() *domain.Market {
 	return domain.NewMarket(0, i.Name)
 }
 
+func FromMarketDomainToFactory(market *domain.Market) *Market {
+	return &Market{Name: market.Name}
+}
+
 func NewMarketFactory(t *testing.T) *domain.Market {
 	Market := &Market{}
 	err := faker.FakeData(Market)
