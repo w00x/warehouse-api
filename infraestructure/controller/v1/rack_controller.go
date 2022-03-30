@@ -53,7 +53,7 @@ func (rackController *RackController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewRackSerializerFromDomain(rack))
+	c.JSON(http.StatusCreated, serializer.NewRackSerializerFromDomain(rack))
 }
 
 func (rackController *RackController) Update(c *gin.Context) {

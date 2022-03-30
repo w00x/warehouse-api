@@ -53,7 +53,7 @@ func (priceController *PriceController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewPriceResponseSerializerFromDomain(price))
+	c.JSON(http.StatusCreated, serializer.NewPriceResponseSerializerFromDomain(price))
 }
 
 func (priceController *PriceController) Update(c *gin.Context) {

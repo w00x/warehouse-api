@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
+	"warehouse/infraestructure/repository/mappers"
 	"warehouse/infraestructure/repository/models"
 )
 
@@ -35,11 +36,11 @@ func (r RackRepository) Find(id uint) (*domain.Rack, errors.IBaseError) {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 
-	return instance.ToDomain(), nil
+	return mappers.FromRackModelToDomain(&instance), nil
 }
 
 func (r RackRepository) Create(instance *domain.Rack) (*domain.Rack, errors.IBaseError) {
-	model := models.FromRackDomainToModel(instance)
+	model := mappers.FromRackDomainToModel(instance)
 	result:= r.postgresBase.DB.Create(model)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -74,7 +75,7 @@ func (r RackRepository) Update(instance *domain.Rack) (*domain.Rack, errors.IBas
 }
 
 func (r RackRepository) Delete(instance *domain.Rack) errors.IBaseError {
-	result := r.postgresBase.DB.Delete(models.FromRackDomainToModel(instance))
+	result := r.postgresBase.DB.Delete(mappers.FromRackDomainToModel(instance))
 
 	if err := result.Error; err != nil {
 		return errors.NewInternalServerError(err.Error())

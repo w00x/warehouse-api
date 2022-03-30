@@ -53,7 +53,7 @@ func (stockController *StockController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewStockResponseSerializerFromDomain(stock))
+	c.JSON(http.StatusCreated, serializer.NewStockResponseSerializerFromDomain(stock))
 }
 
 func (stockController *StockController) Update(c *gin.Context) {

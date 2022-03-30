@@ -6,7 +6,7 @@ import (
 	"warehouse/infraestructure/repository/postgres"
 )
 
-func Routes() {
+func Routes() *gin.Engine {
 	route := gin.Default()
 	version1 := route.Group("/v1")
 	{
@@ -70,7 +70,8 @@ func Routes() {
 			stock.DELETE("/:id", stockController.Delete)
 		}
 	}
-	route.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+
+	return route
 }
 
 func GetInventoryRepository() *postgres.InventoryRepository {

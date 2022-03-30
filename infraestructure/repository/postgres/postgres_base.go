@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -12,16 +13,26 @@ type PostgresBase struct {
 	DB *gorm.DB
 }
 
+var dbConn *gorm.DB
+
 func NewPostgresBase() *PostgresBase {
 	connectionDb, err := getConnection()
 	if err != nil {
 		log.Panic(err)
 	}
-
-	return &PostgresBase{connectionDb}
+	return &PostgresBase{ connectionDb }
 }
 
 func getConnection() (*gorm.DB, error) {
-	uri := shared.GetEnv("DATABASE_URI")
-	return gorm.Open(postgres.Open(uri), &gorm.Config{})
+	if dbConn == nil {
+		fmt.Println("=========================NEW CONN DB=============================")
+		uri := shared.GetEnv("DATABASE_URI")
+		var err error
+		dbConn, err = gorm.Open(postgres.Open(uri), &gorm.Config{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return dbConn, nil
 }
+

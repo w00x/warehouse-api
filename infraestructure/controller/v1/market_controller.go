@@ -53,7 +53,7 @@ func (marketController *MarketController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewMarketSerializerFromDomain(market))
+	c.JSON(http.StatusCreated, serializer.NewMarketSerializerFromDomain(market))
 }
 
 func (marketController *MarketController) Update(c *gin.Context) {

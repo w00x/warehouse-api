@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"warehouse/domain"
 	"warehouse/infraestructure/errors"
+	"warehouse/infraestructure/repository/mappers"
 	"warehouse/infraestructure/repository/models"
 )
 
@@ -35,11 +36,11 @@ func (r PriceRepository) Find(id uint) (*domain.Price, errors.IBaseError) {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 
-	return instance.ToDomain(), nil
+	return mappers.FromPriceModelToDomain(&instance), nil
 }
 
 func (r PriceRepository) Create(instance *domain.Price) (*domain.Price, errors.IBaseError) {
-	model := models.FromPriceDomainToModel(instance)
+	model := mappers.FromPriceDomainToModel(instance)
 	result:= r.postgresBase.DB.Create(model)
 	if err := result.Error; err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
@@ -74,7 +75,7 @@ func (r PriceRepository) Update(instance *domain.Price) (*domain.Price, errors.I
 }
 
 func (r PriceRepository) Delete(instance *domain.Price) errors.IBaseError {
-	result := r.postgresBase.DB.Delete(models.FromPriceDomainToModel(instance))
+	result := r.postgresBase.DB.Delete(mappers.FromPriceDomainToModel(instance))
 
 	if err := result.Error; err != nil {
 		return errors.NewInternalServerError(err.Error())

@@ -2,7 +2,6 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"warehouse/domain"
 )
 
 type Rack struct {
@@ -15,15 +14,4 @@ type Rack struct {
 
 func NewRack(id uint, name string, code string) *Rack {
 	return &Rack{Id: id, Name: name, Code: code}
-}
-
-func FromRackDomainToModel(i *domain.Rack) *Rack {
-	if i == nil {
-		return nil
-	}
-	return NewRack(i.Id, i.Name, i.Code)
-}
-
-func (i Rack) ToDomain() *domain.Rack {
-	return domain.NewRack(i.Id, i.Name, i.Code)
 }

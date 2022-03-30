@@ -53,7 +53,7 @@ func (inventoryController *InventoryController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewInventorySerializerFromDomain(inventory))
+	c.JSON(http.StatusCreated, serializer.NewInventorySerializerFromDomain(inventory))
 }
 
 func (inventoryController *InventoryController) Update(c *gin.Context) {

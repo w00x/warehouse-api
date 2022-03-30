@@ -2,7 +2,6 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"warehouse/domain"
 )
 
 type Item struct {
@@ -22,15 +21,4 @@ func NewItem(id uint, name string, unitSizePresentation string, sizePresentation
 	code string, container string, photo string) *Item {
 	return &Item{Id: id, Name: name, UnitSizePresentation: unitSizePresentation,
 		SizePresentation: sizePresentation, Code: code, Container: container, Photo: photo}
-}
-
-func FromItemDomainToModel(i *domain.Item) *Item {
-	if i == nil {
-		return nil
-	}
-	return NewItem(i.Id, i.Name, i.UnitSizePresentation, i.SizePresentation, i.Code, i.Container, i.Photo)
-}
-
-func (i Item) ToDomain() *domain.Item {
-	return domain.NewItem(i.Id, i.Name, i.UnitSizePresentation, i.SizePresentation, i.Code, i.Container, i.Photo)
 }

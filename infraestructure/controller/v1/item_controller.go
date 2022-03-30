@@ -53,7 +53,7 @@ func (itemController *ItemController) Create(c *gin.Context) {
 		c.JSON(err.HttpStatusCode(), gin.H{ "error": err.Error() })
 		return
 	}
-	c.JSON(http.StatusOK, serializer.NewItemSerializerFromDomain(item))
+	c.JSON(http.StatusCreated, serializer.NewItemSerializerFromDomain(item))
 }
 
 func (itemController *ItemController) Update(c *gin.Context) {
