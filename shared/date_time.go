@@ -26,5 +26,9 @@ func (mt *DateTime) UnmarshalJSON(bs []byte) error {
 }
 
 func (mt *DateTime) MarshalJSON() ([]byte, error) {
-	return json.Marshal(time.Time(*mt).Format(dateFormat))
+	location, err := time.LoadLocation("")
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(time.Time(*mt).In(location).Format(dateFormat))
 }

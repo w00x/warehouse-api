@@ -2,7 +2,7 @@ package factories
 
 import (
 	"fmt"
-	"github.com/bxcodec/faker/v3"
+	"github.com/brianvoe/gofakeit/v6"
 	"testing"
 	"time"
 	"warehouse/domain"
@@ -20,7 +20,7 @@ func (i Inventory) ToDomain() *domain.Inventory {
 
 func NewInventoryFactory(t *testing.T) *domain.Inventory {
 	inventory := &Inventory{}
-	err := faker.FakeData(inventory)
+	err := gofakeit.Struct(inventory)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -40,7 +40,7 @@ func NewInventoryFactory(t *testing.T) *domain.Inventory {
 
 func NewInventoryObjectFactory() map[string]interface{} {
 	inventory := &Inventory{}
-	err := faker.FakeData(inventory)
+	err := gofakeit.Struct(inventory)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -58,7 +58,7 @@ func NewInventoryFactoryList(count int, t *testing.T) []*domain.Inventory {
 
 	for i := 0; i < count; i++ {
 		inventory := &Inventory{}
-		err := faker.FakeData(inventory)
+		err := gofakeit.Struct(inventory)
 		if err != nil {
 			panic(err)
 		}

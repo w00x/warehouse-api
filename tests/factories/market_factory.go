@@ -2,7 +2,7 @@ package factories
 
 import (
 	"fmt"
-	"github.com/bxcodec/faker/v3"
+	"github.com/brianvoe/gofakeit/v6"
 	"testing"
 	"warehouse/domain"
 	"warehouse/infraestructure/repository/postgres"
@@ -22,7 +22,7 @@ func FromMarketDomainToFactory(market *domain.Market) *Market {
 
 func NewMarketFactory(t *testing.T) *domain.Market {
 	Market := &Market{}
-	err := faker.FakeData(Market)
+	err := gofakeit.Struct(Market)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -42,7 +42,7 @@ func NewMarketFactory(t *testing.T) *domain.Market {
 
 func NewMarketObjectFactory() map[string]interface{} {
 	market := &Market{}
-	err := faker.FakeData(market)
+	err := gofakeit.Struct(market)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -60,7 +60,7 @@ func NewMarketFactoryList(count int, t *testing.T) []*domain.Market {
 
 	for i := 0; i < count; i++ {
 		Market := &Market{}
-		err := faker.FakeData(Market)
+		err := gofakeit.Struct(Market)
 		if err != nil {
 			panic(err)
 		}

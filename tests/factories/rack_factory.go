@@ -2,7 +2,7 @@ package factories
 
 import (
 	"fmt"
-	"github.com/bxcodec/faker/v3"
+	"github.com/brianvoe/gofakeit/v6"
 	"testing"
 	"warehouse/domain"
 	"warehouse/infraestructure/repository/postgres"
@@ -26,7 +26,7 @@ func FromRackDomainToFactory(rack *domain.Rack) *Rack {
 
 func NewRackFactory(t *testing.T) *domain.Rack {
 	Rack := &Rack{}
-	err := faker.FakeData(Rack)
+	err := gofakeit.Struct(Rack)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -46,7 +46,7 @@ func NewRackFactory(t *testing.T) *domain.Rack {
 
 func NewRackObjectFactory() map[string]interface{} {
 	rack := &Rack{}
-	err := faker.FakeData(rack)
+	err := gofakeit.Struct(rack)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -65,7 +65,7 @@ func NewRackFactoryList(count int, t *testing.T) []*domain.Rack {
 
 	for i := 0; i < count; i++ {
 		Rack := &Rack{}
-		err := faker.FakeData(Rack)
+		err := gofakeit.Struct(Rack)
 		if err != nil {
 			panic(err)
 		}

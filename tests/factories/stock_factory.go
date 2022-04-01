@@ -2,7 +2,7 @@ package factories
 
 import (
 	"fmt"
-	"github.com/bxcodec/faker/v3"
+	"github.com/brianvoe/gofakeit/v6"
 	"testing"
 	"warehouse/domain"
 	"warehouse/infraestructure/repository/postgres"
@@ -15,7 +15,7 @@ type Stock struct {
 	Item 			*Item
 	RackId			uint
 	Rack 			*Rack
-	Quantity        int
+	Quantity        int					`fake:"{number:1,10}"`
 	OperationDate  	shared.DateTime
 	ExpirationDate 	shared.DateTime
 }
@@ -26,7 +26,7 @@ func (i Stock) ToDomain() *domain.Stock {
 
 func NewStockFactory(t *testing.T) *domain.Stock {
 	stock := &Stock{}
-	err := faker.FakeData(stock)
+	err := gofakeit.Struct(stock)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -51,7 +51,7 @@ func NewStockFactory(t *testing.T) *domain.Stock {
 
 func NewStockObjectFactory() map[string]interface{} {
 	stock := &Stock{}
-	err := faker.FakeData(stock)
+	err := gofakeit.Struct(stock)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -81,7 +81,7 @@ func NewStockFactoryList(count int, t *testing.T) []*domain.Stock {
 
 	for i := 0; i < count; i++ {
 		Stock := &Stock{}
-		err := faker.FakeData(Stock)
+		err := gofakeit.Struct(Stock)
 		if err != nil {
 			panic(err)
 		}
