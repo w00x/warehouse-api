@@ -1,11 +1,21 @@
 package domain
 
+import "github.com/google/uuid"
+
 type Rack struct {
-	Id			uint
-	Name 		string
-	Code 		string
+	id   string
+	Name string
+	Code string
 }
 
-func NewRack(id uint, name string, code string) *Rack {
-	return &Rack{Id: id, Name: name, Code: code}
+func NewRack(id string, name string, code string) *Rack {
+	if id == "" {
+		id = uuid.New().String()
+	}
+
+	return &Rack{id: id, Name: name, Code: code}
+}
+
+func (i Rack) Id() string {
+	return i.id
 }

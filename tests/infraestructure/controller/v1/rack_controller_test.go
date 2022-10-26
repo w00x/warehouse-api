@@ -9,41 +9,33 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"testing"
-	"warehouse/infraestructure"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 	"warehouse/tests/factories"
 )
 
 func TestRackIndexController(t *testing.T) {
 	sizeOfRacks := 5
-	racks := factories.NewRackFactoryList(sizeOfRacks, t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
+	racks := factories.NewRackFactoryList(sizeOfRacks)
 
-	resp, _ := http.Get(fmt.Sprintf("%s/v1/rack", server.URL))
+	resp, _ := http.Get(fmt.Sprintf("%s/v1/rack", Server().URL))
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var response []gin.H
-	data, _ := ioutil.ReadAll(resp.Body)
-	json.Unmarshal(data, &response)
-	var ids []float64
+	response := ParseResponseArray(resp)
+	var ids []string
 
 	for _, responseRack := range response {
-		ids = append(ids, responseRack["id"].(float64))
+		ids = append(ids, responseRack["id"].(string))
 	}
 
-	assert.Contains(t, ids, float64(racks[0].Id))
+	assert.Contains(t, ids, racks[0].Id())
 }
 
 func TestRackGetController(t *testing.T) {
-	rack := factories.NewRackFactory(t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
+	rack := factories.NewRackFactory()
 
-	resp, _ := http.Get(fmt.Sprintf("%s/v1/rack/%d", server.URL, rack.Id))
+	resp, _ := http.Get(fmt.Sprintf("%s/v1/rack/%s", Server().URL, rack.Id()))
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -51,14 +43,10 @@ func TestRackGetController(t *testing.T) {
 	data, _ := ioutil.ReadAll(resp.Body)
 	json.Unmarshal(data, &response)
 
-	assert.Equal(t, float64(rack.Id), response["id"])
+	assert.Equal(t, rack.Id(), response["id"])
 }
 
 func TestRackCreateController(t *testing.T) {
-	defer factories.CleanRack()
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
-
 	values := factories.NewRackObjectFactory()
 	jsonData, err := json.Marshal(values)
 
@@ -66,7 +54,7 @@ func TestRackCreateController(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	resp, _ := http.Post(fmt.Sprintf("%s/v1/rack", server.URL), "application/json", bytes.NewBuffer(jsonData))
+	resp, _ := http.Post(fmt.Sprintf("%s/v1/rack", Server().URL), "application/json", bytes.NewBuffer(jsonData))
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
@@ -79,14 +67,12 @@ func TestRackCreateController(t *testing.T) {
 }
 
 func TestRackUpdateController(t *testing.T) {
-	rack := factories.NewRackFactory(t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
+	rack := factories.NewRackFactory()
 
 	values := factories.NewRackObjectFactory()
 	jsonData, _ := json.Marshal(values)
 
-	req, _ := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/v1/rack/%d", server.URL, rack.Id), bytes.NewBuffer(jsonData))
+	req, _ := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/v1/rack/%s", Server().URL, rack.Id()), bytes.NewBuffer(jsonData))
 	client := &http.Client{}
 	resp, _ := client.Do(req)
 
@@ -100,15 +86,13 @@ func TestRackUpdateController(t *testing.T) {
 }
 
 func TestRackDeleteController(t *testing.T) {
-	rack := factories.NewRackFactory(t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
+	rack := factories.NewRackFactory()
 
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/rack/%d", server.URL, rack.Id), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/rack/%s", Server().URL, rack.Id()), nil)
 	client := &http.Client{}
 	resp, _ := client.Do(req)
 
-	_, err := postgres.NewRackRepository().Find(rack.Id)
+	_, err := gorm.NewRackRepository().Find(rack.Id())
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusNotFound, err.HttpStatusCode())
 	assert.Equal(t, http.StatusNoContent, resp.StatusCode)

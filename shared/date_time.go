@@ -32,3 +32,12 @@ func (mt *DateTime) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(time.Time(*mt).In(location).Format(dateFormat))
 }
+
+func StringToDate(date string) (*DateTime, error) {
+	t, err := time.ParseInLocation(dateFormat, date, time.UTC)
+	if err != nil {
+		return nil, err
+	}
+	dateTime := DateTime(t)
+	return &dateTime, nil
+}

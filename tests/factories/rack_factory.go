@@ -3,18 +3,17 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"testing"
 	"warehouse/domain"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 )
 
 type Rack struct {
-	Name 	string
-	Code 	string
+	Name string
+	Code string
 }
 
 func (i Rack) ToDomain() *domain.Rack {
-	return domain.NewRack(0, i.Name, i.Code)
+	return domain.NewRack("", i.Name, i.Code)
 }
 
 func FromRackDomainToFactory(rack *domain.Rack) *Rack {
@@ -24,24 +23,30 @@ func FromRackDomainToFactory(rack *domain.Rack) *Rack {
 	}
 }
 
-func NewRackFactory(t *testing.T) *domain.Rack {
+func NewRackFactory() *domain.Rack {
 	Rack := &Rack{}
 	err := gofakeit.Struct(Rack)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	repo := postgres.NewRackRepository()
+	repo := gorm.NewRackRepository()
 	RackDomain, errRepo := repo.Create(Rack.ToDomain())
 	if errRepo != nil {
 		panic(err)
 	}
 
-	t.Cleanup(func() {
-		CleanRack()
-	})
-
 	return RackDomain
+}
+
+func NewRackDomainFactory() *domain.Rack {
+	Rack := &Rack{}
+	err := gofakeit.Struct(Rack)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return Rack.ToDomain()
 }
 
 func NewRackObjectFactory() map[string]interface{} {
@@ -59,32 +64,23 @@ func NewRackObjectFactory() map[string]interface{} {
 	return rackMarshal
 }
 
-func NewRackFactoryList(count int, t *testing.T) []*domain.Rack {
+func NewRackFactoryList(count int) []*domain.Rack {
 	var RackDomains []*domain.Rack
-	repo := postgres.NewRackRepository()
+	repo := gorm.NewRackRepository()
 
 	for i := 0; i < count; i++ {
-		Rack := &Rack{}
-		err := gofakeit.Struct(Rack)
+		rack := &Rack{}
+		err := gofakeit.Struct(rack)
 		if err != nil {
 			panic(err)
 		}
 
-		RackDomain, errRepo := repo.Create(Rack.ToDomain())
+		RackDomain, errRepo := repo.Create(rack.ToDomain())
 		if errRepo != nil {
 			panic(err)
 		}
 		RackDomains = append(RackDomains, RackDomain)
 	}
 
-	t.Cleanup(func() {
-		CleanRack()
-	})
-
 	return RackDomains
-}
-
-func CleanRack() {
-	postgres.NewPostgresBase().DB.Exec("DELETE FROM racks")
-	postgres.NewPostgresBase().DB.Exec("ALTER SEQUENCE racks_id_seq RESTART WITH 1")
 }

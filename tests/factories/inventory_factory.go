@@ -3,39 +3,45 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"testing"
 	"time"
 	"warehouse/domain"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
+	"warehouse/tests/injectors"
 )
 
 type Inventory struct {
-	OperationDate 	shared.DateTime
+	OperationDate shared.DateTime
 }
 
 func (i Inventory) ToDomain() *domain.Inventory {
-	return domain.NewInventory(0, i.OperationDate)
+	return domain.NewInventory("", i.OperationDate)
 }
 
-func NewInventoryFactory(t *testing.T) *domain.Inventory {
+func NewInventoryFactory() *domain.Inventory {
 	inventory := &Inventory{}
 	err := gofakeit.Struct(inventory)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	repo := postgres.NewInventoryRepository()
+	repo, _ := injectors.InventoryRepository()
 	inventoryDomain, errRepo := repo.Create(inventory.ToDomain())
 	if errRepo != nil {
-		panic(err)
+		panic(errRepo)
 	}
 
-	t.Cleanup(func() {
-		CleanInventory()
-	})
-
 	return inventoryDomain
+}
+
+func NewInventoryDomainFactory() *domain.Inventory {
+	inventory := &Inventory{}
+	err := gofakeit.Struct(inventory)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return inventory.ToDomain()
 }
 
 func NewInventoryObjectFactory() map[string]interface{} {
@@ -52,9 +58,9 @@ func NewInventoryObjectFactory() map[string]interface{} {
 	return inventoryMarshal
 }
 
-func NewInventoryFactoryList(count int, t *testing.T) []*domain.Inventory {
+func NewInventoryFactoryList(count int) []*domain.Inventory {
 	var inventoryDomains []*domain.Inventory
-	repo := postgres.NewInventoryRepository()
+	repo := gorm.NewInventoryRepository()
 
 	for i := 0; i < count; i++ {
 		inventory := &Inventory{}
@@ -65,19 +71,10 @@ func NewInventoryFactoryList(count int, t *testing.T) []*domain.Inventory {
 
 		inventoryDomain, errRepo := repo.Create(inventory.ToDomain())
 		if errRepo != nil {
-			panic(err)
+			panic(errRepo)
 		}
 		inventoryDomains = append(inventoryDomains, inventoryDomain)
 	}
 
-	t.Cleanup(func() {
-		CleanInventory()
-	})
-
 	return inventoryDomains
-}
-
-func CleanInventory() {
-	postgres.NewPostgresBase().DB.Exec("DELETE FROM inventories")
-	postgres.NewPostgresBase().DB.Exec("ALTER SEQUENCE inventories_id_seq RESTART WITH 1")
 }

@@ -1,10 +1,9 @@
 package main
 
 import (
-	"warehouse/infraestructure"
+	"warehouse/infrastructure"
 )
 
 func main() {
-	infraestructure.RunMigrations()
-	infraestructure.Routes().Run()
+	infrastructure.Routes("gorm").Run()
 }

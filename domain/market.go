@@ -1,10 +1,20 @@
 package domain
 
+import "github.com/google/uuid"
+
 type Market struct {
-	Id			uint
-	Name 		string
+	id   string
+	Name string
 }
 
-func NewMarket(id uint, name string) *Market {
-	return &Market{Id: id, Name: name}
+func NewMarket(id string, name string) *Market {
+	if id == "" {
+		id = uuid.New().String()
+	}
+
+	return &Market{id: id, Name: name}
+}
+
+func (i Market) Id() string {
+	return i.id
 }

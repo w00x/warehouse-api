@@ -3,7 +3,7 @@ package application
 import (
 	"warehouse/domain"
 	"warehouse/domain/repository"
-	"warehouse/infraestructure/errors"
+	"warehouse/infrastructure/errors"
 )
 
 type InventoryApplication struct {
@@ -11,14 +11,14 @@ type InventoryApplication struct {
 }
 
 func NewInventoryApplication(inventoryRepository repository.IInventoryRepository) *InventoryApplication {
-	return &InventoryApplication{ inventoryRepository }
+	return &InventoryApplication{inventoryRepository}
 }
 
 func (inventoryApplication *InventoryApplication) All() (*[]domain.Inventory, errors.IBaseError) {
 	return inventoryApplication.inventoryRepository.All()
 }
 
-func (inventoryApplication *InventoryApplication) Show(id uint) (*domain.Inventory, errors.IBaseError) {
+func (inventoryApplication *InventoryApplication) Show(id string) (*domain.Inventory, errors.IBaseError) {
 	return inventoryApplication.inventoryRepository.Find(id)
 }
 

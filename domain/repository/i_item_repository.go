@@ -2,13 +2,13 @@ package repository
 
 import (
 	"warehouse/domain"
-	"warehouse/infraestructure/errors"
+	"warehouse/infrastructure/errors"
 )
 
 type IItemRepository interface {
-	All() 							(*[]domain.Item, errors.IBaseError)
-	Find(id uint) 					(*domain.Item, errors.IBaseError)
-	Create(instance *domain.Item) 	(*domain.Item, errors.IBaseError)
-	Update(instance *domain.Item) 	(*domain.Item, errors.IBaseError)
-	Delete(instance *domain.Item) 	errors.IBaseError
+	All() (*[]domain.Item, errors.IBaseError)
+	Find(id string) (*domain.Item, errors.IBaseError)
+	Create(instance *domain.Item) (*domain.Item, errors.IBaseError)
+	Update(instance *domain.Item) (*domain.Item, errors.IBaseError)
+	Delete(instance *domain.Item) errors.IBaseError
 }

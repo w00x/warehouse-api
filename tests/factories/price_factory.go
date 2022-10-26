@@ -6,46 +6,57 @@ import (
 	"testing"
 	"time"
 	"warehouse/domain"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
 )
 
 type Price struct {
-	Market *Market
-	Item *Item
-	Price float64
-	Date shared.DateTime
-	ItemId uint
-	MarketId uint
+	Market   *Market
+	Item     *Item
+	Price    float64 `fake:"{float32}"`
+	Date     shared.DateTime
+	ItemId   string
+	MarketId string
 }
 
 func (i Price) ToDomain() *domain.Price {
-	return domain.NewPrice(0, i.Market.ToDomain(), i.Item.ToDomain(), i.Price, i.Date, i.ItemId, i.MarketId)
+	return domain.NewPrice("", i.Market.ToDomain(), i.Item.ToDomain(), i.Price, i.Date, i.ItemId, i.MarketId)
 }
 
-func NewPriceFactory(t *testing.T) *domain.Price {
+func NewPriceFactory() *domain.Price {
 	price := &Price{}
 	err := gofakeit.Struct(price)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	market := NewMarketFactory(t)
-	item := NewItemFactory(t)
+	market := NewMarketFactory()
+	item := NewItemFactory()
 	price.Market = FromMarketDomainToFactory(market)
 	price.Item = FromItemDomainToFactory(item)
 
-	repo := postgres.NewPriceRepository()
+	repo := gorm.NewPriceRepository()
 	PriceDomain, errRepo := repo.Create(price.ToDomain())
 	if errRepo != nil {
 		panic(err)
 	}
 
-	t.Cleanup(func() {
-		CleanPrice()
-	})
-
 	return PriceDomain
+}
+
+func NewPriceDomainFactory() *domain.Price {
+	price := &Price{}
+	err := gofakeit.Struct(price)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	market := NewMarketFactory()
+	item := NewItemFactory()
+	price.Market = FromMarketDomainToFactory(market)
+	price.Item = FromItemDomainToFactory(item)
+
+	return price.ToDomain()
 }
 
 func NewPriceObjectFactory() map[string]interface{} {
@@ -57,27 +68,26 @@ func NewPriceObjectFactory() map[string]interface{} {
 
 	priceMarshal := map[string]interface{}{
 		"price": price.Price,
-		"date": time.Time(price.Date).Format("2006-01-02 15:04:05"),
+		"date":  time.Time(price.Date).Format("2006-01-02 15:04:05"),
 	}
 
 	return priceMarshal
 }
 
 func NewPriceObjectForCreateFactory(t *testing.T) map[string]interface{} {
-	market := NewMarketFactory(t)
-	item := NewItemFactory(t)
-
+	market := NewMarketFactory()
+	item := NewItemFactory()
 
 	priceMarshal := NewPriceObjectFactory()
-	priceMarshal["market_id"] = market.Id
-	priceMarshal["item_id"] = item.Id
+	priceMarshal["market_id"] = market.Id()
+	priceMarshal["item_id"] = item.Id()
 
 	return priceMarshal
 }
 
-func NewPriceFactoryList(count int, t *testing.T) []*domain.Price {
+func NewPriceFactoryList(count int) []*domain.Price {
 	var PriceDomains []*domain.Price
-	repo := postgres.NewPriceRepository()
+	repo := gorm.NewPriceRepository()
 
 	for i := 0; i < count; i++ {
 		Price := &Price{}
@@ -93,14 +103,5 @@ func NewPriceFactoryList(count int, t *testing.T) []*domain.Price {
 		PriceDomains = append(PriceDomains, PriceDomain)
 	}
 
-	t.Cleanup(func() {
-		CleanPrice()
-	})
-
 	return PriceDomains
-}
-
-func CleanPrice() {
-	postgres.NewPostgresBase().DB.Exec("DELETE FROM prices")
-	postgres.NewPostgresBase().DB.Exec("ALTER SEQUENCE prices_id_seq RESTART WITH 1")
 }

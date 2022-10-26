@@ -3,7 +3,7 @@ package application
 import (
 	"warehouse/domain"
 	"warehouse/domain/repository"
-	"warehouse/infraestructure/errors"
+	"warehouse/infrastructure/errors"
 )
 
 type MarketApplication struct {
@@ -11,14 +11,14 @@ type MarketApplication struct {
 }
 
 func NewMarketApplication(marketRepository repository.IMarketRepository) *MarketApplication {
-	return &MarketApplication{ marketRepository }
+	return &MarketApplication{marketRepository}
 }
 
 func (marketApplication *MarketApplication) All() (*[]domain.Market, errors.IBaseError) {
 	return marketApplication.marketRepository.All()
 }
 
-func (marketApplication *MarketApplication) Show(id uint) (*domain.Market, errors.IBaseError) {
+func (marketApplication *MarketApplication) Show(id string) (*domain.Market, errors.IBaseError) {
 	return marketApplication.marketRepository.Find(id)
 }
 

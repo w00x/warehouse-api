@@ -1,14 +1,22 @@
 package domain
 
 import (
+	"github.com/google/uuid"
 	"warehouse/shared"
 )
 
 type Inventory struct {
-	Id 				uint
-	OperationDate 	shared.DateTime
+	id            string
+	OperationDate shared.DateTime
 }
 
-func NewInventory(id uint, operationDate shared.DateTime) *Inventory {
-	return &Inventory{Id: id, OperationDate: operationDate}
+func NewInventory(id string, operationDate shared.DateTime) *Inventory {
+	if id == "" {
+		id = uuid.New().String()
+	}
+	return &Inventory{id: id, OperationDate: operationDate}
+}
+
+func (i Inventory) Id() string {
+	return i.id
 }

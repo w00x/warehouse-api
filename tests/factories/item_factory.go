@@ -3,22 +3,21 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"testing"
 	"warehouse/domain"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 )
 
 type Item struct {
-	Name 					string
-	UnitSizePresentation 	string
-	SizePresentation 		int
-	Code 					string
-	Container 				string
-	Photo 					string
+	Name                 string
+	UnitSizePresentation string
+	SizePresentation     int `fake:"{int16}"`
+	Code                 string
+	Container            string
+	Photo                string
 }
 
 func (i Item) ToDomain() *domain.Item {
-	return domain.NewItem(0, i.Name, i.UnitSizePresentation, i.SizePresentation, i.Code, i.Container, i.Photo)
+	return domain.NewItem("", i.Name, i.UnitSizePresentation, i.SizePresentation, i.Code, i.Container, i.Photo)
 }
 
 func FromItemDomainToFactory(item *domain.Item) *Item {
@@ -32,24 +31,30 @@ func FromItemDomainToFactory(item *domain.Item) *Item {
 	}
 }
 
-func NewItemFactory(t *testing.T) *domain.Item {
-	Item := &Item{}
-	err := gofakeit.Struct(Item)
+func NewItemFactory() *domain.Item {
+	item := &Item{}
+	err := gofakeit.Struct(item)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	repo := postgres.NewItemRepository()
-	ItemDomain, errRepo := repo.Create(Item.ToDomain())
+	repo := gorm.NewItemRepository()
+	itemDomain, errRepo := repo.Create(item.ToDomain())
 	if errRepo != nil {
 		panic(err)
 	}
 
-	t.Cleanup(func() {
-		CleanItem()
-	})
+	return itemDomain
+}
 
-	return ItemDomain
+func NewItemDomainFactory() *domain.Item {
+	item := &Item{}
+	err := gofakeit.Struct(item)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return item.ToDomain()
 }
 
 func NewItemObjectFactory() map[string]interface{} {
@@ -60,43 +65,34 @@ func NewItemObjectFactory() map[string]interface{} {
 	}
 
 	itemMarshal := map[string]interface{}{
-		"name": item.Name,
+		"name":                   item.Name,
 		"unit_size_presentation": item.UnitSizePresentation,
-		"size_presentation": item.SizePresentation,
-		"code": item.Code,
-		"container": item.Container,
-		"photo": item.Photo,
+		"size_presentation":      item.SizePresentation,
+		"code":                   item.Code,
+		"container":              item.Container,
+		"photo":                  item.Photo,
 	}
 
 	return itemMarshal
 }
 
-func NewItemFactoryList(count int, t *testing.T) []*domain.Item {
-	var ItemDomains []*domain.Item
-	repo := postgres.NewItemRepository()
+func NewItemFactoryList(count int) []*domain.Item {
+	var itemDomains []*domain.Item
+	repo := gorm.NewItemRepository()
 
 	for i := 0; i < count; i++ {
-		Item := &Item{}
-		err := gofakeit.Struct(Item)
+		item := &Item{}
+		err := gofakeit.Struct(item)
 		if err != nil {
 			panic(err)
 		}
 
-		ItemDomain, errRepo := repo.Create(Item.ToDomain())
+		itemDomain, errRepo := repo.Create(item.ToDomain())
 		if errRepo != nil {
-			panic(err)
+			fmt.Println("Error: %w", errRepo)
 		}
-		ItemDomains = append(ItemDomains, ItemDomain)
+		itemDomains = append(itemDomains, itemDomain)
 	}
 
-	t.Cleanup(func() {
-		CleanItem()
-	})
-
-	return ItemDomains
-}
-
-func CleanItem() {
-	postgres.NewPostgresBase().DB.Exec("DELETE FROM items")
-	postgres.NewPostgresBase().DB.Exec("ALTER SEQUENCE items_id_seq RESTART WITH 1")
+	return itemDomains
 }

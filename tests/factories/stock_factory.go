@@ -3,50 +3,63 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"testing"
+	"time"
 	"warehouse/domain"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
 )
 
 type Stock struct {
-	Id				uint
-	ItemId			uint
-	Item 			*Item
-	RackId			uint
-	Rack 			*Rack
-	Quantity        int					`fake:"{number:1,10}"`
-	OperationDate  	shared.DateTime
-	ExpirationDate 	shared.DateTime
+	Id             string
+	ItemId         string
+	Item           *Item
+	RackId         string
+	Rack           *Rack
+	Quantity       int `fake:"{number:1,10}"`
+	OperationDate  shared.DateTime
+	ExpirationDate shared.DateTime
+	Comment        string
 }
 
 func (i Stock) ToDomain() *domain.Stock {
-	return domain.NewStock(0, i.Item.ToDomain(), i.Rack.ToDomain(), i.Quantity, i.OperationDate, i.ExpirationDate, i.ItemId, i.RackId)
+	return domain.NewStock("", i.Item.ToDomain(), i.Rack.ToDomain(), i.Quantity,
+		i.OperationDate, i.ExpirationDate, i.Comment, i.ItemId, i.RackId)
 }
 
-func NewStockFactory(t *testing.T) *domain.Stock {
+func NewStockFactory() *domain.Stock {
 	stock := &Stock{}
 	err := gofakeit.Struct(stock)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	rack := NewRackFactory(t)
-	item := NewItemFactory(t)
+	rack := NewRackFactory()
+	item := NewItemFactory()
 	stock.Rack = FromRackDomainToFactory(rack)
 	stock.Item = FromItemDomainToFactory(item)
 
-	repo := postgres.NewStockRepository()
+	repo := gorm.NewStockRepository()
 	StockDomain, errRepo := repo.Create(stock.ToDomain())
 	if errRepo != nil {
 		panic(err)
 	}
 
-	t.Cleanup(func() {
-		CleanStock()
-	})
-
 	return StockDomain
+}
+
+func NewStockDomainFactory() *domain.Stock {
+	stock := &Stock{}
+	err := gofakeit.Struct(stock)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	rack := NewRackFactory()
+	item := NewItemFactory()
+	stock.Rack = FromRackDomainToFactory(rack)
+	stock.Item = FromItemDomainToFactory(item)
+
+	return stock.ToDomain()
 }
 
 func NewStockObjectFactory() map[string]interface{} {
@@ -57,50 +70,43 @@ func NewStockObjectFactory() map[string]interface{} {
 	}
 
 	stockMarshal := map[string]interface{}{
-		"quantity": stock.Quantity,
+		"quantity":        stock.Quantity,
+		"operation_date":  time.Time(stock.OperationDate).Format("2006-01-02 15:04:05"),
+		"expiration_date": time.Time(stock.ExpirationDate).Format("2006-01-02 15:04:05"),
+		"comment":         stock.Comment,
 	}
 
 	return stockMarshal
 }
 
-func NewStockObjectForCreateFactory(t *testing.T) map[string]interface{} {
-	rack := NewRackFactory(t)
-	item := NewItemFactory(t)
-
+func NewStockObjectForCreateFactory() map[string]interface{} {
+	rack := NewRackFactory()
+	item := NewItemFactory()
 
 	stockMarshal := NewStockObjectFactory()
-	stockMarshal["rack_id"] = rack.Id
-	stockMarshal["item_id"] = item.Id
+	stockMarshal["rack_id"] = rack.Id()
+	stockMarshal["item_id"] = item.Id()
 
 	return stockMarshal
 }
 
-func NewStockFactoryList(count int, t *testing.T) []*domain.Stock {
+func NewStockFactoryList(count int) []*domain.Stock {
 	var StockDomains []*domain.Stock
-	repo := postgres.NewStockRepository()
+	repo := gorm.NewStockRepository()
 
 	for i := 0; i < count; i++ {
-		Stock := &Stock{}
-		err := gofakeit.Struct(Stock)
+		stock := &Stock{}
+		err := gofakeit.Struct(stock)
 		if err != nil {
 			panic(err)
 		}
 
-		StockDomain, errRepo := repo.Create(Stock.ToDomain())
+		StockDomain, errRepo := repo.Create(stock.ToDomain())
 		if errRepo != nil {
 			panic(err)
 		}
 		StockDomains = append(StockDomains, StockDomain)
 	}
 
-	t.Cleanup(func() {
-		CleanStock()
-	})
-
 	return StockDomains
-}
-
-func CleanStock() {
-	postgres.NewPostgresBase().DB.Exec("DELETE FROM stocks")
-	postgres.NewPostgresBase().DB.Exec("ALTER SEQUENCE stocks_id_seq RESTART WITH 1")
 }

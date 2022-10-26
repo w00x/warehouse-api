@@ -4,122 +4,55 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"testing"
-	"warehouse/infraestructure"
-	"warehouse/infraestructure/repository/postgres"
 	"warehouse/tests/factories"
 )
 
 func TestStockIndexController(t *testing.T) {
 	sizeOfStocks := 5
-	stocks := factories.NewStockFactoryList(sizeOfStocks, t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
+	stocks := factories.NewStockFactoryList(sizeOfStocks)
 
-	resp, _ := http.Get(fmt.Sprintf("%s/v1/stock", server.URL))
+	resp, _ := http.Get(fmt.Sprintf("%s/v1/stock", Server().URL))
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var response []gin.H
-	data, _ := ioutil.ReadAll(resp.Body)
-	err := json.Unmarshal(data, &response)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var ids []float64
+	response := ParseResponseArray(resp)
+	var ids []string
 
 	for _, responseStock := range response {
-		ids = append(ids, responseStock["id"].(float64))
+		ids = append(ids, responseStock["id"].(string))
 	}
 
-	assert.Contains(t, ids, float64(stocks[0].Id))
+	assert.Contains(t, ids, stocks[0].Id())
 }
 
 func TestStockGetController(t *testing.T) {
-	stock := factories.NewStockFactory(t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
+	stock := factories.NewStockFactory()
 
-	resp, _ := http.Get(fmt.Sprintf("%s/v1/stock/%d", server.URL, stock.Id))
+	resp, _ := http.Get(fmt.Sprintf("%s/v1/stock/%s", Server().URL, stock.Id()))
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var response gin.H
-	data, _ := ioutil.ReadAll(resp.Body)
-	err := json.Unmarshal(data, &response)
-	if err != nil {
-		log.Fatal(err)
-	}
+	response := ParseResponse(resp)
 
-	assert.Equal(t, float64(stock.Id), response["id"])
+	assert.Equal(t, stock.Id(), response["id"])
 }
 
 func TestStockCreateController(t *testing.T) {
-	defer factories.CleanStock()
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
-
-	values := factories.NewStockObjectForCreateFactory(t)
+	values := factories.NewStockObjectForCreateFactory()
 	jsonData, err := json.Marshal(values)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resp, _ := http.Post(fmt.Sprintf("%s/v1/stock", server.URL), "application/json", bytes.NewBuffer(jsonData))
+	resp, _ := http.Post(fmt.Sprintf("%s/v1/stock", Server().URL), "application/json", bytes.NewBuffer(jsonData))
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
-	var response gin.H
-	data, _ := ioutil.ReadAll(resp.Body)
-	errUn := json.Unmarshal(data, &response)
-	if err != nil {
-		log.Fatal(errUn)
-	}
+	response := ParseResponse(resp)
 
 	assert.Equal(t, values["quantity"], int(response["quantity"].(float64)))
-}
-
-func TestStockUpdateController(t *testing.T) {
-	stock := factories.NewStockFactory(t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
-
-	values := factories.NewStockObjectFactory()
-	jsonData, _ := json.Marshal(values)
-
-	req, _ := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/v1/stock/%d", server.URL, stock.Id), bytes.NewBuffer(jsonData))
-	client := &http.Client{}
-	resp, _ := client.Do(req)
-
-	var response gin.H
-	data, _ := ioutil.ReadAll(resp.Body)
-	err := json.Unmarshal(data, &response)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	assert.Equal(t, values["quantity"], int(response["quantity"].(float64)))
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-}
-
-func TestStockDeleteController(t *testing.T) {
-	stock := factories.NewStockFactory(t)
-	router := infraestructure.Routes()
-	server := httptest.NewServer(router)
-
-	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/v1/stock/%d", server.URL, stock.Id), nil)
-	client := &http.Client{}
-	resp, _ := client.Do(req)
-
-	_, err := postgres.NewStockRepository().Find(stock.Id)
-	assert.NotNil(t, err)
-	assert.Equal(t, http.StatusNotFound, err.HttpStatusCode())
-	assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 }

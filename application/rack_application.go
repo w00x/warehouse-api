@@ -3,7 +3,7 @@ package application
 import (
 	"warehouse/domain"
 	"warehouse/domain/repository"
-	"warehouse/infraestructure/errors"
+	"warehouse/infrastructure/errors"
 )
 
 type RackApplication struct {
@@ -11,14 +11,14 @@ type RackApplication struct {
 }
 
 func NewRackApplication(rackRepository repository.IRackRepository) *RackApplication {
-	return &RackApplication{ rackRepository }
+	return &RackApplication{rackRepository}
 }
 
 func (rackApplication *RackApplication) All() (*[]domain.Rack, errors.IBaseError) {
 	return rackApplication.rackRepository.All()
 }
 
-func (rackApplication *RackApplication) Show(id uint) (*domain.Rack, errors.IBaseError) {
+func (rackApplication *RackApplication) Show(id string) (*domain.Rack, errors.IBaseError) {
 	return rackApplication.rackRepository.Find(id)
 }
 

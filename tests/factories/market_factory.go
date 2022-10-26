@@ -3,41 +3,46 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"testing"
 	"warehouse/domain"
-	"warehouse/infraestructure/repository/postgres"
+	"warehouse/infrastructure/repository/gorm"
 )
 
 type Market struct {
-	Name 					string
+	Name string
 }
 
 func (i Market) ToDomain() *domain.Market {
-	return domain.NewMarket(0, i.Name)
+	return domain.NewMarket("", i.Name)
 }
 
 func FromMarketDomainToFactory(market *domain.Market) *Market {
 	return &Market{Name: market.Name}
 }
 
-func NewMarketFactory(t *testing.T) *domain.Market {
-	Market := &Market{}
-	err := gofakeit.Struct(Market)
+func NewMarketFactory() *domain.Market {
+	market := &Market{}
+	err := gofakeit.Struct(market)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	repo := postgres.NewMarketRepository()
-	MarketDomain, errRepo := repo.Create(Market.ToDomain())
+	repo := gorm.NewMarketRepository()
+	MarketDomain, errRepo := repo.Create(market.ToDomain())
 	if errRepo != nil {
 		panic(err)
 	}
 
-	t.Cleanup(func() {
-		CleanMarket()
-	})
-
 	return MarketDomain
+}
+
+func NewMarketDomainFactory() *domain.Market {
+	market := &Market{}
+	err := gofakeit.Struct(market)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return market.ToDomain()
 }
 
 func NewMarketObjectFactory() map[string]interface{} {
@@ -54,9 +59,9 @@ func NewMarketObjectFactory() map[string]interface{} {
 	return marketMarshal
 }
 
-func NewMarketFactoryList(count int, t *testing.T) []*domain.Market {
+func NewMarketFactoryList(count int) []*domain.Market {
 	var MarketDomains []*domain.Market
-	repo := postgres.NewMarketRepository()
+	repo := gorm.NewMarketRepository()
 
 	for i := 0; i < count; i++ {
 		Market := &Market{}
@@ -72,14 +77,5 @@ func NewMarketFactoryList(count int, t *testing.T) []*domain.Market {
 		MarketDomains = append(MarketDomains, MarketDomain)
 	}
 
-	t.Cleanup(func() {
-		CleanMarket()
-	})
-
 	return MarketDomains
-}
-
-func CleanMarket() {
-	postgres.NewPostgresBase().DB.Exec("DELETE FROM markets")
-	postgres.NewPostgresBase().DB.Exec("ALTER SEQUENCE markets_id_seq RESTART WITH 1")
 }
