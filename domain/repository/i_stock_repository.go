@@ -11,4 +11,5 @@ type IStockRepository interface {
 	Create(instance *domain.Stock) (*domain.Stock, errors.IBaseError)
 	Update(instance *domain.Stock) (*domain.Stock, errors.IBaseError)
 	Delete(instance *domain.Stock) errors.IBaseError
+	AllByInventory(inventoryId string) (*[]domain.Stock, errors.IBaseError)
 }

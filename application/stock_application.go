@@ -25,3 +25,7 @@ func (stockApplication *StockApplication) Show(id string) (*domain.Stock, errors
 func (stockApplication *StockApplication) Create(stock *domain.Stock) (*domain.Stock, errors.IBaseError) {
 	return stockApplication.stockRepository.Create(stock)
 }
+
+func (stockApplication StockApplication) AllByInventory(inventoryId string) (*[]domain.Stock, errors.IBaseError) {
+	return stockApplication.stockRepository.AllByInventory(inventoryId)
+}

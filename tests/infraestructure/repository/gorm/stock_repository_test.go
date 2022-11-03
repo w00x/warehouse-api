@@ -3,8 +3,12 @@ package gorm
 import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
+	"sort"
 	"testing"
+	"time"
+	"warehouse/domain"
 	"warehouse/infrastructure/repository/gorm"
+	"warehouse/shared"
 	"warehouse/tests/factories"
 )
 
@@ -79,6 +83,38 @@ func TestStockRepository_Update(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, stockFounded)
 	assert.Equal(t, int(newQuantity), stockFounded.Quantity)
+}
+
+func TestStockRepository_AllByInventory(t *testing.T) {
+	sizeOfStocks := 5
+	stocks := factories.NewStockFactoryList(sizeOfStocks)
+	var listDates []shared.DateTime
+
+	for _, stock := range stocks {
+		listDates = append(listDates, stock.OperationDate)
+	}
+
+	sort.Sort(shared.DateTimeList(listDates))
+
+	firstDate := listDates[0]
+	inventoryDate := time.Time(firstDate).Add(-time.Hour * 24)
+	inventoryDomain := domain.NewInventory("", shared.DateTime(inventoryDate))
+	inventoryRepo := gorm.NewInventoryRepository()
+	inventory, errCreate := inventoryRepo.Create(inventoryDomain)
+	assert.Nil(t, errCreate)
+
+	stockRepo := gorm.NewStockRepository()
+	allStocks, err := stockRepo.AllByInventory(inventory.Id())
+	assert.Nil(t, err)
+
+	var stocksIds []string
+	for _, stock := range *allStocks {
+		stocksIds = append(stocksIds, stock.Id())
+	}
+
+	assert.Contains(t, stocksIds, stocks[0].Id())
+	assert.Contains(t, stocksIds, stocks[1].Id())
+	assert.Contains(t, stocksIds, stocks[2].Id())
 }
 
 func TestNewStockRepository(t *testing.T) {

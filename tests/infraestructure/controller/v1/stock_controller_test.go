@@ -7,7 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
+	"sort"
 	"testing"
+	"time"
+	"warehouse/domain"
+	"warehouse/infrastructure/repository/gorm"
+	"warehouse/shared"
 	"warehouse/tests/factories"
 )
 
@@ -55,4 +60,38 @@ func TestStockCreateController(t *testing.T) {
 	response := ParseResponse(resp)
 
 	assert.Equal(t, values["quantity"], int(response["quantity"].(float64)))
+}
+
+func TestStockAllByInventoryController(t *testing.T) {
+	sizeOfStocks := 5
+	stocks := factories.NewStockFactoryList(sizeOfStocks)
+	var listDates []shared.DateTime
+
+	for _, stock := range stocks {
+		listDates = append(listDates, stock.OperationDate)
+	}
+
+	sort.Sort(shared.DateTimeList(listDates))
+
+	firstDate := listDates[0]
+	inventoryDate := time.Time(firstDate).Add(-time.Hour * 24)
+	inventoryDomain := domain.NewInventory("", shared.DateTime(inventoryDate))
+	inventoryRepo := gorm.NewInventoryRepository()
+	inventory, errCreate := inventoryRepo.Create(inventoryDomain)
+	assert.Nil(t, errCreate)
+
+	resp, _ := http.Get(fmt.Sprintf("%s/v1/stock/inventory/%s", Server().URL, inventory.Id()))
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	response := ParseResponseArray(resp)
+	var ids []string
+
+	for _, responseStock := range response {
+		ids = append(ids, responseStock["id"].(string))
+	}
+
+	assert.Contains(t, ids, stocks[0].Id())
+	assert.Contains(t, ids, stocks[1].Id())
+	assert.Contains(t, ids, stocks[2].Id())
 }

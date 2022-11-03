@@ -2,9 +2,13 @@ package application
 
 import (
 	"github.com/stretchr/testify/assert"
+	"sort"
 	"testing"
+	"time"
 	"warehouse/application"
+	"warehouse/domain"
 	"warehouse/infrastructure/repository/gorm"
+	"warehouse/shared"
 	"warehouse/tests/factories"
 )
 
@@ -43,6 +47,37 @@ func TestStockApplication_Show(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, stock.Id(), findedStock.Id())
+}
+
+func TestStockApplication_AllByInventory(t *testing.T) {
+	sizeOfStocks := 5
+	stocks := factories.NewStockFactoryList(sizeOfStocks)
+	var listDates []shared.DateTime
+
+	for _, stock := range stocks {
+		listDates = append(listDates, stock.OperationDate)
+	}
+
+	sort.Sort(shared.DateTimeList(listDates))
+
+	firstDate := listDates[0]
+	inventoryDate := time.Time(firstDate).Add(-time.Hour * 24)
+	inventoryDomain := domain.NewInventory("", shared.DateTime(inventoryDate))
+	inventoryRepo := gorm.NewInventoryRepository()
+	inventory, errCreate := inventoryRepo.Create(inventoryDomain)
+	assert.Nil(t, errCreate)
+
+	repo := gorm.NewStockRepository()
+	stockApplication := application.NewStockApplication(repo)
+	stocksList, err := stockApplication.AllByInventory(inventory.Id())
+
+	assert.Nil(t, err)
+	var ids []string
+	for _, stock := range *stocksList {
+		ids = append(ids, stock.Id())
+	}
+
+	assert.Contains(t, ids, stocks[0].Id())
 }
 
 func TestNewStockApplication(t *testing.T) {

@@ -100,7 +100,7 @@ func NewStockFactoryList(count int) []*domain.Stock {
 		if err != nil {
 			panic(err)
 		}
-
+		stock.OperationDate = shared.DateTime(gofakeit.Date())
 		StockDomain, errRepo := repo.Create(stock.ToDomain())
 		if errRepo != nil {
 			panic(err)

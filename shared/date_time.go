@@ -41,3 +41,17 @@ func StringToDate(date string) (*DateTime, error) {
 	dateTime := DateTime(t)
 	return &dateTime, nil
 }
+
+type DateTimeList []DateTime
+
+func (dateTimeList DateTimeList) Len() int {
+	return len(dateTimeList)
+}
+
+func (dateTimeList DateTimeList) Less(i, j int) bool {
+	return time.Time(dateTimeList[i]).Before(time.Time(dateTimeList[j]))
+}
+
+func (dateTimeList DateTimeList) Swap(i, j int) {
+	dateTimeList[i], dateTimeList[j] = dateTimeList[j], dateTimeList[i]
+}

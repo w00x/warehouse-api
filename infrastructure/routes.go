@@ -236,6 +236,14 @@ func Routes(factoryAdapter string) *gin.Engine {
 				}
 				stockController.Create(ctx)
 			})
+
+			stock.GET("/inventory/:id", func(context *gin.Context) {
+				ctx, err := factory.ContextFactory(contextAdapter, context)
+				if err != nil {
+					panic(err)
+				}
+				stockController.AllByInventory(ctx)
+			})
 		}
 	}
 

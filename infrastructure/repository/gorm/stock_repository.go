@@ -93,3 +93,25 @@ func (r StockRepository) Delete(instance *domain.Stock) errors.IBaseError {
 
 	return nil
 }
+
+func (r StockRepository) AllByInventory(inventoryId string) (*[]domain.Stock, errors.IBaseError) {
+	inventoryRepo := NewInventoryRepository()
+	inventory, errInventory := inventoryRepo.Find(inventoryId)
+
+	if errInventory != nil {
+		return nil, errInventory
+	}
+
+	fromDate := inventory.OperationDate
+	var stocks []models.Stock
+
+	result := r.postgresBase.DB.Joins("Item").
+		Joins("Rack").
+		Where("operation_date >= ?", fromDate).Find(&stocks)
+
+	if err := result.Error; err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	return mappers.NewStockListDomainFromModel(&stocks), nil
+}

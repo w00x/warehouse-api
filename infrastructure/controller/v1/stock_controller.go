@@ -17,12 +17,12 @@ func NewStockController(stockApplication *application.StockApplication) *StockCo
 }
 
 func (stockController *StockController) Index(c context.IContextAdapter) {
-	inventories, err := stockController.stockApplication.All()
+	stocks, err := stockController.stockApplication.All()
 	if err != nil {
 		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, dto.NewStockListResponseDtoFromDomains(inventories))
+	c.JSON(http.StatusOK, dto.NewStockListResponseDtoFromDomains(stocks))
 }
 
 func (stockController *StockController) Create(c context.IContextAdapter) {
@@ -54,4 +54,21 @@ func (stockController *StockController) Get(c context.IContextAdapter) {
 	}
 
 	c.JSON(http.StatusOK, dto.NewStockResponseDtoFromDomain(stock))
+}
+
+func (stockController StockController) AllByInventory(c context.IContextAdapter) {
+	var inventoryDto dto.ItemDto
+	if err := c.ShouldBindUri(&inventoryDto); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	stocks, err := stockController.stockApplication.AllByInventory(inventoryDto.Id)
+
+	if err != nil {
+		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.NewStockListResponseDtoFromDomains(stocks))
 }
