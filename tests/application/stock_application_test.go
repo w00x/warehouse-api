@@ -33,7 +33,9 @@ func TestStockApplication_All(t *testing.T) {
 	repoInventory.Create(domain.NewInventory("", inventoryDate))
 
 	repoStock := gorm.NewStockRepository()
-	stockApplication := application.NewStockApplication(repoStock)
+	repoItem := gorm.NewItemRepository()
+	repoRack := gorm.NewRackRepository()
+	stockApplication := application.NewStockApplication(repoStock, repoItem, repoRack)
 	stocks, err := stockApplication.All()
 
 	assert.Nil(t, err)
@@ -46,8 +48,10 @@ func TestStockApplication_All(t *testing.T) {
 func TestStockApplication_Create(t *testing.T) {
 	stock := factories.NewStockDomainFactory()
 	repo := gorm.NewStockRepository()
-	stockApplication := application.NewStockApplication(repo)
-	newStock, err := stockApplication.Create(stock)
+	repoItem := gorm.NewItemRepository()
+	repoRack := gorm.NewRackRepository()
+	stockApplication := application.NewStockApplication(repo, repoItem, repoRack)
+	newStock, err := stockApplication.Create(stock.Item.Code, stock.Rack.Code, stock.Quantity, stock.OperationDate, stock.ExpirationDate, stock.Comment)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, newStock.Id())
@@ -57,7 +61,10 @@ func TestStockApplication_Create(t *testing.T) {
 func TestStockApplication_Show(t *testing.T) {
 	stock := factories.NewStockFactory()
 	repo := gorm.NewStockRepository()
-	stockApplication := application.NewStockApplication(repo)
+	repoItem := gorm.NewItemRepository()
+	repoRack := gorm.NewRackRepository()
+
+	stockApplication := application.NewStockApplication(repo, repoItem, repoRack)
 	findedStock, err := stockApplication.Show(stock.Id())
 
 	assert.Nil(t, err)
@@ -83,7 +90,9 @@ func TestStockApplication_AllByInventory(t *testing.T) {
 	assert.Nil(t, errCreate)
 
 	repo := gorm.NewStockRepository()
-	stockApplication := application.NewStockApplication(repo)
+	repoItem := gorm.NewItemRepository()
+	repoRack := gorm.NewRackRepository()
+	stockApplication := application.NewStockApplication(repo, repoItem, repoRack)
 	stocksList, err := stockApplication.AllByInventory(inventory.Id())
 
 	assert.Nil(t, err)
@@ -97,7 +106,10 @@ func TestStockApplication_AllByInventory(t *testing.T) {
 
 func TestNewStockApplication(t *testing.T) {
 	repo := gorm.NewStockRepository()
-	stockApplication := application.NewStockApplication(repo)
+	repoItem := gorm.NewItemRepository()
+	repoRack := gorm.NewRackRepository()
+
+	stockApplication := application.NewStockApplication(repo, repoItem, repoRack)
 
 	assert.NotNil(t, stockApplication)
 }

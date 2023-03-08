@@ -39,6 +39,19 @@ func (r ItemRepository) Find(id string) (*domain.Item, errors.IBaseError) {
 	return mappers.FromItemModelToDomain(&instance), nil
 }
 
+func (r ItemRepository) FindByCode(code string) (*domain.Item, errors.IBaseError) {
+	var instance models.Item
+	result := r.postgresBase.DB.First(&instance, "code = ?", code)
+
+	if err := result.Error; err == gorm.ErrRecordNotFound {
+		return nil, errors.NewNotFoundError("Item not found")
+	} else if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	return mappers.FromItemModelToDomain(&instance), nil
+}
+
 func (r ItemRepository) Create(instance *domain.Item) (*domain.Item, errors.IBaseError) {
 	model := mappers.FromItemDomainToModel(instance)
 	result := r.postgresBase.DB.Create(model)

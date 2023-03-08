@@ -31,9 +31,9 @@ func (stockController *StockController) Create(c context.IContextAdapter) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	stock, err := stockController.stockApplication.Create(stockDto.ToDomain())
-	if err != nil {
-		c.JSON(err.HttpStatusCode(), gin.H{"error": err.Error()})
+	stock, errCreate := stockController.stockApplication.Create(stockDto.ItemCode, stockDto.RackCode, stockDto.Quantity, stockDto.OperationDate, stockDto.ExpirationDate, stockDto.Comment)
+	if errCreate != nil {
+		c.JSON(errCreate.HttpStatusCode(), gin.H{"error": errCreate.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, dto.NewStockResponseDtoFromDomain(stock))

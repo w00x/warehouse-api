@@ -52,10 +52,12 @@ func InitializeRackController(factoryAdapter string) *v1.RackController {
 }
 
 func InitializeStockController(factoryAdapter string) *v1.StockController {
-	repository, err := repository.StockFactory(factoryAdapter)
+	stockRepository, err := repository.StockFactory(factoryAdapter)
+	itemRepository, err := repository.ItemFactory(factoryAdapter)
+	rackRepository, err := repository.RackFactory(factoryAdapter)
 	if err != nil {
 		panic(err)
 	}
-	application := application.NewStockApplication(repository)
+	application := application.NewStockApplication(stockRepository, itemRepository, rackRepository)
 	return v1.NewStockController(application)
 }

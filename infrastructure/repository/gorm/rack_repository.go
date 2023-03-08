@@ -39,6 +39,19 @@ func (r RackRepository) Find(id string) (*domain.Rack, errors.IBaseError) {
 	return mappers.FromRackModelToDomain(&instance), nil
 }
 
+func (r RackRepository) FindByCode(code string) (*domain.Rack, errors.IBaseError) {
+	var instance models.Rack
+	result := r.postgresBase.DB.First(&instance, "code = ?", code)
+
+	if err := result.Error; err == gorm.ErrRecordNotFound {
+		return nil, errors.NewNotFoundError("Rack not found")
+	} else if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	return mappers.FromRackModelToDomain(&instance), nil
+}
+
 func (r RackRepository) Create(instance *domain.Rack) (*domain.Rack, errors.IBaseError) {
 	model := mappers.FromRackDomainToModel(instance)
 	result := r.postgresBase.DB.Create(model)

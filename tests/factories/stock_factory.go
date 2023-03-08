@@ -83,8 +83,8 @@ func NewStockObjectForCreateFactory() map[string]interface{} {
 	item := NewItemFactory()
 
 	stockMarshal := NewStockObjectFactory()
-	stockMarshal["rack_id"] = rack.Id()
-	stockMarshal["item_id"] = item.Id()
+	stockMarshal["rack_code"] = rack.Code
+	stockMarshal["item_code"] = item.Code
 
 	return stockMarshal
 }
