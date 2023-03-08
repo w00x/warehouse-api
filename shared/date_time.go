@@ -1,11 +1,14 @@
 package shared
 
 import (
+	"database/sql/driver"
 	"encoding/json"
 	"time"
 )
 
-type DateTime time.Time
+type DateTime struct {
+	time.Time
+}
 
 var _ json.Unmarshaler = &DateTime{}
 
@@ -21,7 +24,7 @@ func (mt *DateTime) UnmarshalJSON(bs []byte) error {
 	if err != nil {
 		return err
 	}
-	*mt = DateTime(t)
+	*mt = TimeToDateTime(t)
 	return nil
 }
 
@@ -30,7 +33,20 @@ func (mt *DateTime) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(time.Time(*mt).In(location).Format(dateFormat))
+	return json.Marshal(mt.Time.In(location).Format(dateFormat))
+}
+
+func (mt *DateTime) Scan(value interface{}) error {
+	mt.Time = value.(time.Time)
+	return nil
+}
+
+func (mt DateTime) Value() (driver.Value, error) {
+	return mt.Time, nil
+}
+
+func TimeToDateTime(time time.Time) DateTime {
+	return DateTime{time}
 }
 
 func StringToDate(date string) (*DateTime, error) {
@@ -38,7 +54,7 @@ func StringToDate(date string) (*DateTime, error) {
 	if err != nil {
 		return nil, err
 	}
-	dateTime := DateTime(t)
+	dateTime := TimeToDateTime(t)
 	return &dateTime, nil
 }
 
@@ -49,7 +65,7 @@ func (dateTimeList DateTimeList) Len() int {
 }
 
 func (dateTimeList DateTimeList) Less(i, j int) bool {
-	return time.Time(dateTimeList[i]).Before(time.Time(dateTimeList[j]))
+	return dateTimeList[i].Time.Before(dateTimeList[j].Time)
 }
 
 func (dateTimeList DateTimeList) Swap(i, j int) {

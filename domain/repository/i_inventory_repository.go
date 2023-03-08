@@ -11,4 +11,5 @@ type IInventoryRepository interface {
 	Create(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError)
 	Update(instance *domain.Inventory) (*domain.Inventory, errors.IBaseError)
 	Delete(instance *domain.Inventory) errors.IBaseError
+	Last() (*domain.Inventory, errors.IBaseError)
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	"testing"
-	"time"
 	"warehouse/domain"
 	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
@@ -68,7 +67,7 @@ func NewPriceObjectFactory() map[string]interface{} {
 
 	priceMarshal := map[string]interface{}{
 		"price": price.Price,
-		"date":  time.Time(price.Date).Format("2006-01-02 15:04:05"),
+		"date":  price.Date.Format("2006-01-02 15:04:05"),
 	}
 
 	return priceMarshal

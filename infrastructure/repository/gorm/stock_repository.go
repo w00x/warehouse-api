@@ -115,3 +115,14 @@ func (r StockRepository) AllByInventory(inventoryId string) (*[]domain.Stock, er
 
 	return mappers.NewStockListDomainFromModel(&stocks), nil
 }
+
+func (r StockRepository) AllByLastInventory() (*[]domain.Stock, errors.IBaseError) {
+	inventoryRepo := NewInventoryRepository()
+	inventory, errInventory := inventoryRepo.Last()
+
+	if errInventory != nil {
+		return nil, errInventory
+	}
+
+	return r.AllByInventory(inventory.Id())
+}

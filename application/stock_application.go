@@ -15,7 +15,7 @@ func NewStockApplication(stockRepository repository.IStockRepository) *StockAppl
 }
 
 func (stockApplication *StockApplication) All() (*[]domain.Stock, errors.IBaseError) {
-	return stockApplication.stockRepository.All()
+	return stockApplication.stockRepository.AllByLastInventory()
 }
 
 func (stockApplication *StockApplication) Show(id string) (*domain.Stock, errors.IBaseError) {

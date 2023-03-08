@@ -3,7 +3,6 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"time"
 	"warehouse/domain"
 	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
@@ -52,7 +51,7 @@ func NewInventoryObjectFactory() map[string]interface{} {
 	}
 
 	inventoryMarshal := map[string]interface{}{
-		"operation_date": time.Time(inventory.OperationDate).Format("2006-01-02 15:04:05"),
+		"operation_date": inventory.OperationDate.Format("2006-01-02 15:04:05"),
 	}
 
 	return inventoryMarshal

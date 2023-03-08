@@ -33,7 +33,7 @@ func TestInventoryRepository_Create(t *testing.T) {
 	inventory, err := inventoryRepo.Create(inventoryData)
 	assert.Nil(t, err)
 
-	assert.Equal(t, inventory.OperationDate, dateTime)
+	assert.Equal(t, inventory.OperationDate.Unix(), dateTime.Unix())
 	assert.NotNil(t, inventory.Id())
 }
 
@@ -68,7 +68,7 @@ func TestInventoryRepository_Find(t *testing.T) {
 
 func TestInventoryRepository_Update(t *testing.T) {
 	inventory := factories.NewInventoryFactory()
-	newDate := shared.DateTime(time.Time{}.Add(-time.Hour * 24))
+	newDate := shared.TimeToDateTime(time.Time{}.Add(-time.Hour * 24))
 	inventoryRepo := gorm.NewInventoryRepository()
 	inventory.OperationDate = newDate
 	inventoryUpdated, err := inventoryRepo.Update(inventory)

@@ -9,23 +9,38 @@ import (
 	"warehouse/domain"
 	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
+	"warehouse/tests"
 	"warehouse/tests/factories"
 )
 
 func TestStockApplication_All(t *testing.T) {
+	tests.CleanStock()
+	tests.CleanInventory()
 	sizeOfInventories := 5
 	stocksList := factories.NewStockFactoryList(sizeOfInventories)
-	repo := gorm.NewStockRepository()
-	stockApplication := application.NewStockApplication(repo)
+
+	var dates []shared.DateTime
+	for _, stock := range stocksList {
+		dates = append(dates, stock.OperationDate)
+	}
+
+	datesList := shared.DateTimeList(dates)
+	sort.Sort(&datesList)
+
+	inventoryDate := datesList[1]
+
+	repoInventory := gorm.NewInventoryRepository()
+	repoInventory.Create(domain.NewInventory("", inventoryDate))
+
+	repoStock := gorm.NewStockRepository()
+	stockApplication := application.NewStockApplication(repoStock)
 	stocks, err := stockApplication.All()
 
 	assert.Nil(t, err)
-	var ids []string
-	for _, stock := range stocksList {
-		ids = append(ids, stock.Id())
-	}
-
-	assert.Contains(t, ids, (*stocks)[0].Id())
+	assert.NotEqual(t, len(stocksList), len(*stocks))
+	assert.Equal(t, len(stocksList)-1, len(*stocks))
+	tests.CleanStock()
+	tests.CleanInventory()
 }
 
 func TestStockApplication_Create(t *testing.T) {
@@ -61,8 +76,8 @@ func TestStockApplication_AllByInventory(t *testing.T) {
 	sort.Sort(shared.DateTimeList(listDates))
 
 	firstDate := listDates[0]
-	inventoryDate := time.Time(firstDate).Add(-time.Hour * 24)
-	inventoryDomain := domain.NewInventory("", shared.DateTime(inventoryDate))
+	inventoryDate := firstDate.Time.Add(-time.Hour * 24)
+	inventoryDomain := domain.NewInventory("", shared.TimeToDateTime(inventoryDate))
 	inventoryRepo := gorm.NewInventoryRepository()
 	inventory, errCreate := inventoryRepo.Create(inventoryDomain)
 	assert.Nil(t, errCreate)

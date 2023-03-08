@@ -34,7 +34,7 @@ func TestInventoryApplication_Create(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, newInventory.Id())
-	assert.Equal(t, inventory.OperationDate, newInventory.OperationDate)
+	assert.Equal(t, inventory.OperationDate.Unix(), newInventory.OperationDate.Unix())
 }
 
 func TestInventoryApplication_Delete(t *testing.T) {

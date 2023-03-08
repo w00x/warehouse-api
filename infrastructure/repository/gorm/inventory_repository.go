@@ -91,3 +91,16 @@ func (r InventoryRepository) Delete(instance *domain.Inventory) errors.IBaseErro
 
 	return nil
 }
+
+func (r InventoryRepository) Last() (*domain.Inventory, errors.IBaseError) {
+	var instance models.Inventory
+	result := r.postgresBase.DB.Order("operation_date DESC").First(&instance)
+
+	if err := result.Error; err == gorm.ErrRecordNotFound {
+		return nil, errors.NewNotFoundError("Repository not found")
+	} else if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	return mappers.FromInventoryModelToDomain(&instance), nil
+}

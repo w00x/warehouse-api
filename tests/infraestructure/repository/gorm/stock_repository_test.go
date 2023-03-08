@@ -97,8 +97,8 @@ func TestStockRepository_AllByInventory(t *testing.T) {
 	sort.Sort(shared.DateTimeList(listDates))
 
 	firstDate := listDates[0]
-	inventoryDate := time.Time(firstDate).Add(-time.Hour * 24)
-	inventoryDomain := domain.NewInventory("", shared.DateTime(inventoryDate))
+	inventoryDate := firstDate.Time.Add(-time.Hour * 24)
+	inventoryDomain := domain.NewInventory("", shared.TimeToDateTime(inventoryDate))
 	inventoryRepo := gorm.NewInventoryRepository()
 	inventory, errCreate := inventoryRepo.Create(inventoryDomain)
 	assert.Nil(t, errCreate)

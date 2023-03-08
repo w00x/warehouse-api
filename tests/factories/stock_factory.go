@@ -3,7 +3,6 @@ package factories
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"time"
 	"warehouse/domain"
 	"warehouse/infrastructure/repository/gorm"
 	"warehouse/shared"
@@ -71,8 +70,8 @@ func NewStockObjectFactory() map[string]interface{} {
 
 	stockMarshal := map[string]interface{}{
 		"quantity":        stock.Quantity,
-		"operation_date":  time.Time(stock.OperationDate).Format("2006-01-02 15:04:05"),
-		"expiration_date": time.Time(stock.ExpirationDate).Format("2006-01-02 15:04:05"),
+		"operation_date":  stock.OperationDate.Format("2006-01-02 15:04:05"),
+		"expiration_date": stock.ExpirationDate.Format("2006-01-02 15:04:05"),
 		"comment":         stock.Comment,
 	}
 
@@ -100,7 +99,7 @@ func NewStockFactoryList(count int) []*domain.Stock {
 		if err != nil {
 			panic(err)
 		}
-		stock.OperationDate = shared.DateTime(gofakeit.Date())
+		stock.OperationDate = shared.TimeToDateTime(gofakeit.Date())
 		StockDomain, errRepo := repo.Create(stock.ToDomain())
 		if errRepo != nil {
 			panic(err)

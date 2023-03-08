@@ -20,6 +20,19 @@ func TestStockIndexController(t *testing.T) {
 	sizeOfStocks := 5
 	stocks := factories.NewStockFactoryList(sizeOfStocks)
 
+	var dates []shared.DateTime
+	for _, stock := range stocks {
+		dates = append(dates, stock.OperationDate)
+	}
+
+	datesList := shared.DateTimeList(dates)
+	sort.Sort(&datesList)
+
+	inventoryDate := datesList[1]
+
+	repoInventory := gorm.NewInventoryRepository()
+	repoInventory.Create(domain.NewInventory("", inventoryDate))
+
 	resp, _ := http.Get(fmt.Sprintf("%s/v1/stock", Server().URL))
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -31,7 +44,8 @@ func TestStockIndexController(t *testing.T) {
 		ids = append(ids, responseStock["id"].(string))
 	}
 
-	assert.Contains(t, ids, stocks[0].Id())
+	assert.NotEqual(t, len(stocks), len(ids))
+	assert.Equal(t, len(stocks)-1, len(ids))
 }
 
 func TestStockGetController(t *testing.T) {
@@ -74,8 +88,8 @@ func TestStockAllByInventoryController(t *testing.T) {
 	sort.Sort(shared.DateTimeList(listDates))
 
 	firstDate := listDates[0]
-	inventoryDate := time.Time(firstDate).Add(-time.Hour * 24)
-	inventoryDomain := domain.NewInventory("", shared.DateTime(inventoryDate))
+	inventoryDate := firstDate.Time.Add(-time.Hour * 24)
+	inventoryDomain := domain.NewInventory("", shared.TimeToDateTime(inventoryDate))
 	inventoryRepo := gorm.NewInventoryRepository()
 	inventory, errCreate := inventoryRepo.Create(inventoryDomain)
 	assert.Nil(t, errCreate)
